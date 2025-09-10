@@ -4,7 +4,7 @@
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/hdaklue/actioncrumb/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/hdaklue/actioncrumb/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/hdaklue/actioncrumb.svg?style=flat-square)](https://packagist.org/packages/hdaklue/actioncrumb)
 
-**Revolutionize Your Laravel Navigation** with intelligent breadcrumbs that do more than just show where you are. ActionCrumb transforms traditional breadcrumbs into powerful, interactive navigation components with contextual dropdown actions.
+**Enhance Your Laravel Navigation** with intelligent breadcrumbs that do more than just show where you are. ActionCrumb transforms traditional breadcrumbs into powerful, interactive navigation components with contextual dropdown actions.
 
 > **The Problem**: Standard breadcrumbs are static and force users into complex navigation patterns. Admin panels need quick actions, but adding toolbar buttons everywhere creates UI bloat and poor mobile experiences.
 

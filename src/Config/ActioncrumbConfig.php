@@ -135,7 +135,7 @@ class ActioncrumbConfig
             }
         } elseif ($isClickable) {
             $classes[] = $primaryColors['text'] . ' ' . $primaryColors['hover_text'];
-            $classes[] = 'transition-colors duration-200';
+            $classes[] = 'transition-colors duration-200 cursor-pointer';
         } else {
             $classes[] = 'text-gray-500 dark:text-gray-400';
         }
@@ -148,7 +148,7 @@ class ActioncrumbConfig
         $themeClasses = $this->themeStyle->getClasses()['dropdown_trigger'];
         $primaryColors = $this->primaryColor->getColorClasses();
         
-        return "{$themeClasses} {$primaryColors['text']} {$primaryColors['hover_text']} {$primaryColors['hover_bg']} transition-colors duration-200";
+        return "{$themeClasses} {$primaryColors['text']} {$primaryColors['hover_text']} {$primaryColors['hover_bg']} transition-colors duration-200 cursor-pointer";
     }
 
     public function getDropdownMenuClasses(): string
@@ -166,6 +166,6 @@ class ActioncrumbConfig
         $textColor = $this->isDarkMode() ? 'text-gray-200 hover:text-gray-100' : 'text-gray-700 hover:text-gray-900';
         $spacingClass = $this->direction === Direction::RTL ? 'space-x-reverse space-x-2' : 'space-x-2';
         
-        return "flex items-center {$spacingClass} w-full px-3 py-2 text-sm {$textColor} {$hoverBg} text-left transition-colors duration-150";
+        return "flex items-center {$spacingClass} w-full px-3 py-2 text-sm {$textColor} {$hoverBg} text-left transition-colors duration-150 cursor-pointer";
     }
 }

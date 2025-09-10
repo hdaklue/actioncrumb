@@ -29,7 +29,7 @@
                         <button 
                             @click="open = !open" 
                             @click.away="open = false"
-                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                             <x-icon name="heroicon-o-chevron-down" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
                         </button>
                         
@@ -62,9 +62,7 @@
                     class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}"
                     wire:navigate>
                     @if($step->getIcon())
-                        <svg class="w-4 h-4 {{ $config->getDirection() === \Hdaklue\Actioncrumb\Enums\Direction::RTL ? 'ml-1' : 'mr-1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                        </svg>
+                        <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 {{ $config->getDirection() === \Hdaklue\Actioncrumb\Enums\Direction::RTL ? 'ml-1' : 'mr-1' }}" />
                     @endif
                     {{ $step->getLabel() }}
                 </a>
@@ -72,9 +70,7 @@
                 {{-- Current or inactive step --}}
                 <span class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}">
                     @if($step->getIcon())
-                        <svg class="w-4 h-4 {{ $config->getDirection() === \Hdaklue\Actioncrumb\Enums\Direction::RTL ? 'ml-1' : 'mr-1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                        </svg>
+                        <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 {{ $config->getDirection() === \Hdaklue\Actioncrumb\Enums\Direction::RTL ? 'ml-1' : 'mr-1' }}" />
                     @endif
                     {{ $step->getLabel() }}
                 </span>
