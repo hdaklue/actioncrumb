@@ -11,6 +11,8 @@ class Action
     protected ?string $url = null;
     protected ?\Closure $execute = null;
     protected bool $separator = false;
+    protected bool|\Closure $visible = true;
+    protected bool|\Closure $enabled = true;
 
     public function __construct(string $label)
     {
@@ -58,6 +60,18 @@ class Action
     public function separator(bool $separator = true): self
     {
         $this->separator = $separator;
+        return $this;
+    }
+
+    public function visible(bool|\Closure $visible): self
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
+    public function enabled(bool|\Closure $enabled): self
+    {
+        $this->enabled = $enabled;
         return $this;
     }
 
@@ -118,5 +132,19 @@ class Action
         }
 
         return $this->url;
+    }
+
+    public function isVisible(): bool
+    {
+        return is_callable($this->visible) 
+            ? call_user_func($this->visible) 
+            : $this->visible;
+    }
+
+    public function isEnabled(): bool
+    {
+        return is_callable($this->enabled) 
+            ? call_user_func($this->enabled) 
+            : $this->enabled;
     }
 }

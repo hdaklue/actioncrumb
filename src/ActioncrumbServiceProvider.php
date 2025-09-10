@@ -2,12 +2,11 @@
 
 namespace Hdaklue\Actioncrumb;
 
-use Illuminate\Support\ServiceProvider;
 use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
-use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;
 use Hdaklue\Actioncrumb\Enums\TailwindColor;
-use Hdaklue\Actioncrumb\Enums\Direction;
+use Hdaklue\Actioncrumb\Enums\ThemeStyle;
+use Illuminate\Support\ServiceProvider;
 
 class ActioncrumbServiceProvider extends ServiceProvider
 {
@@ -28,10 +27,8 @@ class ActioncrumbServiceProvider extends ServiceProvider
             ->themeStyle(ThemeStyle::Simple)
             ->separatorType(SeparatorType::Chevron)
             ->primaryColor(TailwindColor::Blue)
-            ->secondaryColor(TailwindColor::Gray)
-            ->direction(Direction::LTR)
+            ->secondaryColor(TailwindColor::Zinc)
             ->enableDropdowns(true)
-            ->darkMode(false)
             ->bind();
     }
 

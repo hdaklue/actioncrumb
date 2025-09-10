@@ -5,7 +5,6 @@ namespace Hdaklue\Actioncrumb\Config;
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;
 use Hdaklue\Actioncrumb\Enums\TailwindColor;
-use Hdaklue\Actioncrumb\Enums\Direction;
 
 class ActioncrumbConfig
 {
@@ -13,9 +12,8 @@ class ActioncrumbConfig
     protected SeparatorType $separatorType = SeparatorType::Chevron;
     protected TailwindColor $primaryColor = TailwindColor::Blue;
     protected TailwindColor $secondaryColor = TailwindColor::Gray;
-    protected Direction $direction = Direction::LTR;
     protected bool $enableDropdowns = true;
-    protected bool $darkMode = false;
+    protected bool $compact = false;
     protected array $themes = [];
 
     public static function make(): self
@@ -47,11 +45,6 @@ class ActioncrumbConfig
         return $this;
     }
 
-    public function direction(Direction $direction): self
-    {
-        $this->direction = $direction;
-        return $this;
-    }
 
     public function enableDropdowns(bool $enable = true): self
     {
@@ -59,9 +52,10 @@ class ActioncrumbConfig
         return $this;
     }
 
-    public function darkMode(bool $dark = true): self
+
+    public function compact(bool $compact = true): self
     {
-        $this->darkMode = $dark;
+        $this->compact = $compact;
         return $this;
     }
 
@@ -96,28 +90,24 @@ class ActioncrumbConfig
         return $this->secondaryColor;
     }
 
-    public function getDirection(): Direction
-    {
-        return $this->direction;
-    }
 
     public function isDropdownsEnabled(): bool
     {
         return $this->enableDropdowns;
     }
 
-    public function isDarkMode(): bool
+
+    public function isCompact(): bool
     {
-        return $this->darkMode;
+        return $this->compact;
     }
 
     public function getContainerClasses(): string
     {
         $baseClasses = 'flex items-center text-sm';
-        $directionClass = $this->direction->getSpacingClass();
-        $dirClass = $this->direction->getDirectionClass();
+        $spacingClass = $this->compact ? 'space-x-1 rtl:space-x-reverse' : 'space-x-2 rtl:space-x-reverse';
         
-        return "{$baseClasses} {$directionClass} {$dirClass}";
+        return "{$baseClasses} {$spacingClass}";
     }
 
     public function getStepClasses(bool $isClickable, bool $isCurrent): string
@@ -127,6 +117,11 @@ class ActioncrumbConfig
         $secondaryColors = $this->secondaryColor->getColorClasses();
         
         $classes = [$themeClasses];
+        
+        // Add compact spacing
+        if ($this->compact) {
+            $classes[] = 'px-1 py-0.5';
+        }
         
         if ($isCurrent) {
             $classes[] = 'font-medium text-gray-900 dark:text-gray-100';
@@ -147,25 +142,22 @@ class ActioncrumbConfig
     {
         $themeClasses = $this->themeStyle->getClasses()['dropdown_trigger'];
         $primaryColors = $this->primaryColor->getColorClasses();
+        $padding = $this->compact ? 'p-0.5' : 'p-1';
         
-        return "{$themeClasses} {$primaryColors['text']} {$primaryColors['hover_text']} {$primaryColors['hover_bg']} transition-colors duration-200 cursor-pointer";
+        return "{$themeClasses} {$padding} {$primaryColors['text']} {$primaryColors['hover_text']} {$primaryColors['hover_bg']} transition-colors duration-200 cursor-pointer";
     }
 
     public function getDropdownMenuClasses(): string
     {
-        $bgClass = $this->isDarkMode() ? 'bg-gray-800 dark:bg-gray-800' : 'bg-white dark:bg-gray-800';
-        $borderClass = 'border border-gray-200 dark:border-gray-700';
-        $positionClass = $this->direction === Direction::RTL ? 'right-0' : 'left-0';
-        
-        return "absolute z-50 mt-1 {$bgClass} {$borderClass} rounded-md shadow-lg py-1 min-w-40 {$positionClass}";
+        return 'absolute z-50 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-40 left-0 rtl:left-auto rtl:right-0';
     }
 
     public function getDropdownItemClasses(): string
     {
-        $hoverBg = $this->isDarkMode() ? 'hover:bg-gray-700' : 'hover:bg-gray-50';
-        $textColor = $this->isDarkMode() ? 'text-gray-200 hover:text-gray-100' : 'text-gray-700 hover:text-gray-900';
-        $spacingClass = $this->direction === Direction::RTL ? 'space-x-reverse space-x-2' : 'space-x-2';
+        $spacingClass = 'space-x-2 rtl:space-x-reverse';
+        $padding = $this->compact ? 'px-2 py-1' : 'px-3 py-2';
+        $textSize = $this->compact ? 'text-xs' : 'text-sm';
         
-        return "flex items-center {$spacingClass} w-full px-3 py-2 text-sm {$textColor} {$hoverBg} text-left transition-colors duration-150 cursor-pointer";
+        return "flex items-center {$spacingClass} w-full {$padding} {$textSize} text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 text-left rtl:text-right transition-colors duration-150 cursor-pointer";
     }
 }

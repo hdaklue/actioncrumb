@@ -11,6 +11,8 @@ class Step
     protected array $routeParams = [];
     protected array $actions = [];
     protected bool $current = false;
+    protected bool|\Closure $visible = true;
+    protected bool|\Closure $enabled = true;
 
     public function __construct(string $label)
     {
@@ -53,6 +55,18 @@ class Step
     public function current(bool $current = true): self
     {
         $this->current = $current;
+        return $this;
+    }
+
+    public function visible(bool|\Closure $visible): self
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
+    public function enabled(bool|\Closure $enabled): self
+    {
+        $this->enabled = $enabled;
         return $this;
     }
 
@@ -108,7 +122,21 @@ class Step
 
     public function isClickable(): bool
     {
-        return !$this->current && ($this->hasUrl() || $this->hasRoute());
+        return !$this->current && ($this->hasUrl() || $this->hasRoute()) && $this->isEnabled();
+    }
+
+    public function isVisible(): bool
+    {
+        return is_callable($this->visible) 
+            ? call_user_func($this->visible) 
+            : $this->visible;
+    }
+
+    public function isEnabled(): bool
+    {
+        return is_callable($this->enabled) 
+            ? call_user_func($this->enabled) 
+            : $this->enabled;
     }
 
     public function getResolvedUrl(): ?string
