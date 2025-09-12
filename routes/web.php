@@ -1,6 +1,4 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Hdaklue\Actioncrumb\Livewire\ActioncrumbDemo;
-
-Route::get('/actioncrumb-demo', ActioncrumbDemo::class)->name('actioncrumb.demo');
+// Demo routes have been moved to main application
+// This file can be removed in production usage

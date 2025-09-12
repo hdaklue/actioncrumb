@@ -51,7 +51,7 @@
                                     
                                     <button 
                                         @click="$wire.handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); showActionsModal = false"
-                                        class="w-full flex items-center px-3 py-3 text-left text-gray-700 dark:text-gray-200 rounded-lg transition-colors {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                                        class="w-full flex items-center px-3 py-3 min-h-[2.5rem] text-left text-gray-700 dark:text-gray-200 rounded-lg transition-colors {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700' }}"
                                         {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                         
                                         @if($action->getIcon())
@@ -60,7 +60,7 @@
                                             <x-icon name="heroicon-o-squares-2x2" class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" />
                                         @endif
                                         
-                                        <span class="font-medium">{{ $action->getLabel() }}</span>
+                                        <span class="font-medium flex-1 flex items-center">{{ $action->getLabel() }}</span>
                                     </button>
                                 @endif
                             @endforeach

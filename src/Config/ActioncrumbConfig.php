@@ -147,14 +147,28 @@ class ActioncrumbConfig
 
     public function getStepClasses(bool $isClickable, bool $isCurrent, bool $hasDropdown = false): string
     {
-        // For most themes, we let CSS handle the styling
-        // Only return minimal classes needed for functionality
         $classes = ['inline-flex items-center'];
         
-        // Add basic interaction states for compatibility
-        if ($isClickable) {
-            $classes[] = 'cursor-pointer';
+        // Apply color scheme based on current state and configuration
+        if ($isCurrent) {
+            // Current step uses primary color
+            $classes[] = 'text-' . $this->primaryColor->value . '-600 dark:text-' . $this->primaryColor->value . '-400';
+            $classes[] = 'font-medium';
+        } else {
+            // Other steps use secondary color
+            $classes[] = 'text-' . $this->secondaryColor->value . '-600 dark:text-' . $this->secondaryColor->value . '-400';
+            
+            if ($isClickable) {
+                // Add hover states for clickable steps
+                $classes[] = 'hover:text-' . $this->primaryColor->value . '-700 dark:hover:text-' . $this->primaryColor->value . '-300';
+                $classes[] = 'transition-colors duration-150';
+                $classes[] = 'cursor-pointer';
+            }
         }
+        
+        // Add padding based on compact mode
+        $padding = $this->compact ? 'px-2 py-1' : 'px-3 py-2';
+        $classes[] = $padding;
         
         return implode(' ', $classes);
     }
@@ -181,11 +195,18 @@ class ActioncrumbConfig
     {
         $secondaryColorClasses = $this->secondaryColor->getColorClasses();
         
+        // Theme-specific border radius
+        $borderRadius = match ($this->themeStyle) {
+            ThemeStyle::Simple => 'rounded-md',    // Medium radius
+            ThemeStyle::Rounded => 'rounded-xl',   // Extra large radius
+            ThemeStyle::Square => 'rounded-none',  // No radius
+        };
+        
         // Use Tailwind classes instead of custom CSS
         $classes = [
             'bg-white dark:bg-gray-800',
             'border border-' . $this->secondaryColor->value . '-500 dark:border-' . $this->secondaryColor->value . '-400',
-            'rounded-none', // No border radius as requested
+            $borderRadius,
             'min-w-48 max-w-80 max-h-80',
             'overflow-y-auto',
             'shadow-lg',
@@ -211,6 +232,32 @@ class ActioncrumbConfig
             'cursor-pointer',
             'border-0 rounded-none', // No borders or radius as requested
         ];
+        
+        return implode(' ', $classes);
+    }
+
+    public function getMobileStepClasses(bool $isClickable, bool $isCurrent): string
+    {
+        $classes = ['inline-flex items-center'];
+        
+        // Apply color scheme based on current state and configuration
+        if ($isCurrent) {
+            // Current step uses primary color
+            $classes[] = 'text-' . $this->primaryColor->value . '-600 dark:text-' . $this->primaryColor->value . '-400';
+            $classes[] = 'font-semibold';
+        } else {
+            // Other steps use secondary color
+            $classes[] = 'text-' . $this->secondaryColor->value . '-600 dark:text-' . $this->secondaryColor->value . '-400';
+            
+            if ($isClickable) {
+                // Add hover states for clickable steps
+                $classes[] = 'hover:text-' . $this->primaryColor->value . '-700 dark:hover:text-' . $this->primaryColor->value . '-300';
+                $classes[] = 'transition-colors duration-150';
+                $classes[] = 'font-medium';
+            } else {
+                $classes[] = 'font-medium';
+            }
+        }
         
         return implode(' ', $classes);
     }

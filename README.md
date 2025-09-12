@@ -62,7 +62,7 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
-use Hdaklue\Actioncrumb\ValueObjects\{Step, Action};
+use Hdaklue\Actioncrumb\{Step, Action};
 
 class UsersManagement extends Component
 {

@@ -43,7 +43,7 @@
                 @foreach($steps as $index => $step)
                     @if($step->isVisible())
                         <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center flex-1">
+                            <div class="flex items-center flex-1 min-h-[2.5rem]">
                                 @if($step->getIcon())
                                     <x-icon name="{{ $step->getIcon() }}" class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" />
                                 @endif
@@ -53,11 +53,11 @@
                                         href="{{ $step->getResolvedUrl() }}" 
                                         wire:navigate
                                         @click="showBreadcrumbModal = false"
-                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                                        class="{{ $config->getMobileStepClasses($step->isClickable(), $step->isCurrent()) }}">
                                         {{ $step->getLabel() }}
                                     </a>
                                 @else
-                                    <span class="text-gray-900 dark:text-gray-100 font-medium {{ $step->isCurrent() ? 'font-semibold' : '' }}">
+                                    <span class="{{ $config->getMobileStepClasses($step->isClickable(), $step->isCurrent()) }}">
                                         {{ $step->getLabel() }}
                                     </span>
                                 @endif
