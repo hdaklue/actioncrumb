@@ -1,6 +1,6 @@
 <?php
 
-namespace Hdaklue\Actioncrumb\ValueObjects;
+namespace Hdaklue\Actioncrumb;
 
 class Step
 {

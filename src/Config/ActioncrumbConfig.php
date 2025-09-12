@@ -14,6 +14,7 @@ class ActioncrumbConfig
     protected TailwindColor $secondaryColor = TailwindColor::Gray;
     protected bool $enableDropdowns = true;
     protected bool $compact = false;
+    protected bool $compactMenuOnMobile = false;
     protected array $themes = [];
 
     public static function make(): self
@@ -56,6 +57,12 @@ class ActioncrumbConfig
     public function compact(bool $compact = true): self
     {
         $this->compact = $compact;
+        return $this;
+    }
+
+    public function compactMenuOnMobile(bool $compactMenuOnMobile = true): self
+    {
+        $this->compactMenuOnMobile = $compactMenuOnMobile;
         return $this;
     }
 
@@ -102,6 +109,11 @@ class ActioncrumbConfig
         return $this->compact;
     }
 
+    public function isCompactMenuOnMobile(): bool
+    {
+        return $this->compactMenuOnMobile;
+    }
+
     public function getContainerClasses(): string
     {
         $baseClasses = 'flex items-center text-sm';
@@ -110,54 +122,96 @@ class ActioncrumbConfig
         return "{$baseClasses} {$spacingClass}";
     }
 
-    public function getStepClasses(bool $isClickable, bool $isCurrent): string
+    public function getMobileScrollClasses(): string
     {
-        $themeClasses = $this->themeStyle->getClasses()['step'];
-        $primaryColors = $this->primaryColor->getColorClasses();
-        $secondaryColors = $this->secondaryColor->getColorClasses();
+        return 'flex items-center text-sm space-x-2 rtl:space-x-reverse overflow-x-auto scrollbar-hide';
+    }
+
+    public function getStepContainerClasses(bool $isCurrent): string
+    {
+        // Use our consolidated CSS classes - styling is now handled by CSS
+        $baseClasses = 'actioncrumb-step';
         
-        $classes = [$themeClasses];
+        // Add theme-specific classes
+        $themeClass = match ($this->themeStyle) {
+            ThemeStyle::Simple => 'theme-simple',
+            ThemeStyle::Rounded => 'theme-rounded',
+            ThemeStyle::Square => 'theme-square',
+        };
         
-        // Add compact spacing
-        if ($this->compact) {
-            $classes[] = 'px-1 py-0.5';
-        }
+        // Add current state class
+        $currentClass = $isCurrent ? 'is-current' : '';
         
-        if ($isCurrent) {
-            $classes[] = 'font-medium text-gray-900 dark:text-gray-100';
-            if ($this->themeStyle !== ThemeStyle::Simple) {
-                $classes[] = $secondaryColors['border'];
-            }
-        } elseif ($isClickable) {
-            $classes[] = $primaryColors['text'] . ' ' . $primaryColors['hover_text'];
-            $classes[] = 'transition-colors duration-200 cursor-pointer';
-        } else {
-            $classes[] = 'text-gray-500 dark:text-gray-400';
+        return trim("{$baseClasses} {$themeClass} {$currentClass}");
+    }
+
+    public function getStepClasses(bool $isClickable, bool $isCurrent, bool $hasDropdown = false): string
+    {
+        // For most themes, we let CSS handle the styling
+        // Only return minimal classes needed for functionality
+        $classes = ['inline-flex items-center'];
+        
+        // Add basic interaction states for compatibility
+        if ($isClickable) {
+            $classes[] = 'cursor-pointer';
         }
         
         return implode(' ', $classes);
     }
 
-    public function getDropdownTriggerClasses(): string
+    public function getDropdownTriggerClasses(bool $isCurrent = false): string
     {
-        $themeClasses = $this->themeStyle->getClasses()['dropdown_trigger'];
-        $primaryColors = $this->primaryColor->getColorClasses();
-        $padding = $this->compact ? 'p-0.5' : 'p-1';
+        // Basic dropdown trigger classes - styling handled by CSS
+        $padding = $this->compact ? 'p-1' : 'p-1.5';
+        $classes = ['inline-flex', 'items-center', $padding, 'cursor-pointer'];
         
-        return "{$themeClasses} {$padding} {$primaryColors['text']} {$primaryColors['hover_text']} {$primaryColors['hover_bg']} transition-colors duration-200 cursor-pointer";
+        // Add theme class for CSS targeting
+        $themeClass = match ($this->themeStyle) {
+            ThemeStyle::Simple => 'theme-simple',
+            ThemeStyle::Rounded => 'theme-rounded',
+            ThemeStyle::Square => 'theme-square',
+        };
+        
+        $classes[] = $themeClass;
+        
+        return implode(' ', $classes);
     }
 
     public function getDropdownMenuClasses(): string
     {
-        return 'absolute z-50 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 min-w-40 left-0 rtl:left-auto rtl:right-0';
+        $secondaryColorClasses = $this->secondaryColor->getColorClasses();
+        
+        // Use Tailwind classes instead of custom CSS
+        $classes = [
+            'bg-white dark:bg-gray-800',
+            'border border-' . $this->secondaryColor->value . '-500 dark:border-' . $this->secondaryColor->value . '-400',
+            'rounded-none', // No border radius as requested
+            'min-w-48 max-w-80 max-h-80',
+            'overflow-y-auto',
+            'shadow-lg',
+            'p-0', // No padding for full-width items
+        ];
+        
+        return implode(' ', $classes);
     }
 
     public function getDropdownItemClasses(): string
     {
-        $spacingClass = 'space-x-2 rtl:space-x-reverse';
-        $padding = $this->compact ? 'px-2 py-1' : 'px-3 py-2';
-        $textSize = $this->compact ? 'text-xs' : 'text-sm';
+        $secondaryColorClasses = $this->secondaryColor->getColorClasses();
         
-        return "flex items-center {$spacingClass} w-full {$padding} {$textSize} text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 text-left rtl:text-right transition-colors duration-150 cursor-pointer";
+        // Use Tailwind classes instead of custom CSS
+        $classes = [
+            'flex items-center gap-3',
+            'w-full text-left',
+            'px-6 py-3', // Proper padding for full-width items
+            'text-sm',
+            'text-gray-700 dark:text-gray-300',
+            'hover:bg-' . $this->secondaryColor->value . '-50 dark:hover:bg-' . $this->secondaryColor->value . '-900/20',
+            'transition-colors duration-150',
+            'cursor-pointer',
+            'border-0 rounded-none', // No borders or radius as requested
+        ];
+        
+        return implode(' ', $classes);
     }
 }

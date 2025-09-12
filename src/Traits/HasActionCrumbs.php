@@ -2,10 +2,10 @@
 
 namespace Hdaklue\Actioncrumb\Traits;
 
-use Hdaklue\Actioncrumb\ValueObjects\Step;
-use Hdaklue\Actioncrumb\ValueObjects\Action;
+use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Renderers\ActioncrumbRenderer;
+use Hdaklue\Actioncrumb\Step;
 
 trait HasActionCrumbs
 {
@@ -28,15 +28,15 @@ trait HasActionCrumbs
     public function renderActioncrumbs(): string
     {
         $steps = $this->getActioncrumbs();
-        $config = app(ActioncrumbConfig::class);
-        
+        $config = app(ActioncrumbConfig::class)->compact()->compactMenuOnMobile();
+
         return ActioncrumbRenderer::make($config)->render($steps, $this);
     }
 
     public function handleActioncrumbAction(string $actionId, string $stepId): mixed
     {
         $steps = $this->getActioncrumbs();
-        
+
         foreach ($steps as $step) {
             if (!$step->hasActions()) {
                 continue;
@@ -44,20 +44,20 @@ trait HasActionCrumbs
 
             foreach ($step->getActions() as $index => $action) {
                 $currentActionId = md5($step->getLabel() . $action->getLabel() . $index);
-                
+
                 if ($currentActionId === $actionId) {
                     // Check if action is enabled before executing
                     if (!$action->isEnabled()) {
                         return null;
                     }
-                    
+
                     if ($action->hasExecute()) {
                         $result = call_user_func($action->getExecute());
-                        
+
                         $this->dispatch('actioncrumb:action-executed', [
                             'action' => $action->getLabel(),
                             'step' => $step->getLabel(),
-                            'result' => $result
+                            'result' => $result,
                         ]);
 
                         return $result;
@@ -79,11 +79,8 @@ trait HasActionCrumbs
 
     protected function getListeners(): array
     {
-        return array_merge(
-            parent::getListeners() ?? [],
-            [
-                'actioncrumb:execute' => 'handleActioncrumbAction'
-            ]
-        );
+        return array_merge(parent::getListeners() ?? [], [
+            'actioncrumb:execute' => 'handleActioncrumbAction',
+        ]);
     }
 }

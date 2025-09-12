@@ -1,7 +1,7 @@
 <?php
 
-use Hdaklue\Actioncrumb\ValueObjects\Step;
-use Hdaklue\Actioncrumb\ValueObjects\Action;
+use Hdaklue\Actioncrumb\Step;
+use Hdaklue\Actioncrumb\Action;
 use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 
@@ -61,13 +61,23 @@ class ExampleComponent extends \Livewire\Component
         return view('livewire.example-component');
     }
 
-    // Example of configuring compact mode in service provider or component
-    protected function configureCompactMode()
+    // Example of configuring compact menu on mobile
+    protected function configureMobileCompactMenu()
     {
         ActioncrumbConfig::make()
             ->themeStyle(ThemeStyle::Simple)
+            ->compactMenuOnMobile(true) // Show only current step + hamburger on mobile
+            ->compact(false) // Use normal spacing for better UX
+            ->bind();
+    }
+
+    // Example of full breadcrumb on mobile with horizontal scroll
+    protected function configureFullBreadcrumbMobile()
+    {
+        ActioncrumbConfig::make()
+            ->themeStyle(ThemeStyle::Rounded)
             ->compact(true) // Enable compact spacing
-            ->darkMode(false)
+            ->compactMenuOnMobile(false) // Show full breadcrumb on mobile (with auto-scroll)
             ->bind();
     }
 

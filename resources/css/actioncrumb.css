@@ -1,0 +1,529 @@
+/* ActionCrumb - Consolidated Flat Design Styles */
+
+/* =================================================================
+   ALPINE.JS FIXES & PORTAL POSITIONING
+   ================================================================= */
+
+/* Alpine.js x-cloak directive to prevent flickering */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Portal dropdown - positioned by JavaScript and CSS */
+.actioncrumb-dropdown-portal {
+    /* Use absolute positioning to stay in the document flow for @click.away */
+    position: absolute;
+    z-index: 999999;
+    /* Position below the button - using calc for cleaner CSS */
+    top: calc(100% + 4px);
+    left: 0;
+    /* Ensure it appears above everything */
+    transform: translateZ(0);
+    /* Force hardware acceleration for better layering */
+    will-change: transform;
+    /* Ensure clicks work on dropdown items */
+    pointer-events: auto;
+    /* Prevent parent container clipping */
+    position: absolute;
+}
+
+/* =================================================================
+   CORE VARIABLES & UTILITIES
+   ================================================================= */
+
+/* Custom Properties for Flat Design Theming */
+:root {
+    --actioncrumb-transition-fast: 120ms ease-out;
+    --actioncrumb-transition-normal: 180ms ease-out;
+    --actioncrumb-transition-slow: 250ms ease-out;
+    --actioncrumb-border-width: 1px;
+    --actioncrumb-border-radius-sm: 0.25rem;
+    --actioncrumb-border-radius-md: 0.375rem;
+    --actioncrumb-border-radius-lg: 0.5rem;
+    --actioncrumb-border-radius-xl: 0.75rem;
+    --actioncrumb-border-radius-full: 9999px;
+    
+    /* Compact spacing variables */
+    --actioncrumb-spacing-xs: 0.125rem;
+    --actioncrumb-spacing-sm: 0.25rem;
+    --actioncrumb-spacing-md: 0.375rem;
+    --actioncrumb-spacing-lg: 0.5rem;
+}
+
+/* Hide scrollbar while maintaining functionality */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}
+
+/* =================================================================
+   MAIN CONTAINER & NAVIGATION
+   ================================================================= */
+
+/* Flat ActionCrumb Container */
+.actioncrumb-container {
+    /* Ensure dropdowns aren't clipped */
+    overflow-y: visible;
+    overflow-x: auto;
+    position: relative;
+    /* Compact spacing for breadcrumb navigation */
+    font-size: 0.875rem; /* text-sm */
+}
+
+/* Ensure dropdown parent containers can contain absolute positioned dropdowns */
+.actioncrumb-container .relative {
+    position: relative;
+    /* Create stacking context for dropdowns */
+    z-index: 1;
+}
+
+/* Ensure dropdown containers don't get clipped */
+.actioncrumb-container nav {
+    overflow-y: visible;
+}
+
+/* Smooth scrolling for flat design */
+.actioncrumb-container nav {
+    scroll-behavior: smooth;
+    /* Compact spacing but ensure separators are visible */
+    gap: var(--actioncrumb-spacing-md);
+}
+
+/* Breadcrumb items should maintain their content width */
+.actioncrumb-container nav > * {
+    flex-shrink: 0;
+}
+
+/* Flat Text Rendering */
+.actioncrumb-container nav a,
+.actioncrumb-container nav span {
+    white-space: normal;
+    word-break: break-word;
+    hyphens: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.25; /* Tighter line height for compact design */
+}
+
+/* =================================================================
+   THEME-SPECIFIC FLAT STYLES
+   ================================================================= */
+
+/* Simple Theme: Ultra-clean minimal flat design */
+.actioncrumb-container .theme-simple {
+    --theme-transition: var(--actioncrumb-transition-normal);
+}
+
+.actioncrumb-container .theme-simple .actioncrumb-step {
+    padding: var(--actioncrumb-spacing-sm) var(--actioncrumb-spacing-md);
+    border-radius: var(--actioncrumb-border-radius-md);
+    border-left: 3px solid transparent;
+    transition: all var(--theme-transition);
+}
+
+.actioncrumb-container .theme-simple .actioncrumb-step.is-current {
+    background-color: #dbeafe; /* blue-100 */
+    border-left-color: #3b82f6; /* blue-500 */
+    color: #1e40af; /* blue-800 */
+}
+
+.dark .actioncrumb-container .theme-simple .actioncrumb-step.is-current {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+    border-left-color: #60a5fa; /* blue-400 */
+    color: #93c5fd; /* blue-300 */
+}
+
+.actioncrumb-container .theme-simple .actioncrumb-step:hover:not(.is-current) {
+    background-color: #f8fafc; /* slate-50 */
+    border-left-color: #64748b; /* slate-500 */
+}
+
+.dark .actioncrumb-container .theme-simple .actioncrumb-step:hover:not(.is-current) {
+    background-color: rgba(148, 163, 184, 0.1); /* slate-400/10 */
+    border-left-color: #64748b; /* slate-500 */
+}
+
+/* Rounded Theme: Modern flat pill design */
+.actioncrumb-container .theme-rounded {
+    --theme-transition: var(--actioncrumb-transition-normal);
+}
+
+.actioncrumb-container .theme-rounded .actioncrumb-step {
+    padding: var(--actioncrumb-spacing-md) var(--actioncrumb-spacing-lg);
+    border-radius: var(--actioncrumb-border-radius-full);
+    border: 1px solid transparent;
+    transition: all var(--theme-transition);
+    background-color: #f8fafc; /* slate-50 */
+}
+
+.dark .actioncrumb-container .theme-rounded .actioncrumb-step {
+    background-color: #334155; /* slate-700 */
+}
+
+.actioncrumb-container .theme-rounded .actioncrumb-step.is-current {
+    background-color: #3b82f6; /* blue-500 */
+    color: #ffffff;
+    border-color: #2563eb; /* blue-600 */
+}
+
+.dark .actioncrumb-container .theme-rounded .actioncrumb-step.is-current {
+    background-color: #3b82f6; /* blue-500 */
+    color: #ffffff;
+    border-color: #1d4ed8; /* blue-700 */
+}
+
+.actioncrumb-container .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+    background-color: #e2e8f0; /* slate-200 */
+    border-color: #cbd5e1; /* slate-300 */
+}
+
+.dark .actioncrumb-container .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+    background-color: #475569; /* slate-600 */
+    border-color: #64748b; /* slate-500 */
+}
+
+/* Square Theme: Bold flat geometric design */
+.actioncrumb-container .theme-square {
+    --theme-transition: var(--actioncrumb-transition-fast);
+}
+
+.actioncrumb-container .theme-square .actioncrumb-step {
+    padding: var(--actioncrumb-spacing-md) var(--actioncrumb-spacing-lg);
+    border-radius: 0;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    transition: all var(--theme-transition);
+    background-color: #ffffff;
+    position: relative;
+}
+
+.dark .actioncrumb-container .theme-square .actioncrumb-step {
+    border-color: #475569; /* slate-600 */
+    background-color: #1e293b; /* slate-800 */
+}
+
+.actioncrumb-container .theme-square .actioncrumb-step.is-current {
+    background-color: #dbeafe; /* blue-100 */
+    border-color: #3b82f6; /* blue-500 */
+    color: #1e40af; /* blue-800 */
+}
+
+.actioncrumb-container .theme-square .actioncrumb-step.is-current::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background-color: #3b82f6; /* blue-500 */
+}
+
+.dark .actioncrumb-container .theme-square .actioncrumb-step.is-current {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+    border-color: #60a5fa; /* blue-400 */
+    color: #93c5fd; /* blue-300 */
+}
+
+.dark .actioncrumb-container .theme-square .actioncrumb-step.is-current::before {
+    background-color: #60a5fa; /* blue-400 */
+}
+
+.actioncrumb-container .theme-square .actioncrumb-step:hover:not(.is-current) {
+    background-color: #f1f5f9; /* slate-100 */
+    border-color: #cbd5e1; /* slate-300 */
+}
+
+.dark .actioncrumb-container .theme-square .actioncrumb-step:hover:not(.is-current) {
+    background-color: #334155; /* slate-700 */
+    border-color: #64748b; /* slate-500 */
+}
+
+/* =================================================================
+   DROPDOWN STYLES
+   ================================================================= */
+
+/* Dropdown trigger buttons */
+.actioncrumb-container button.theme-simple {
+    border-radius: var(--actioncrumb-border-radius-sm);
+    transition: all var(--actioncrumb-transition-fast);
+    color: #64748b; /* slate-500 */
+}
+
+.actioncrumb-container button.theme-simple:hover {
+    background-color: #dbeafe; /* blue-100 */
+    color: #1e40af; /* blue-800 */
+}
+
+.dark .actioncrumb-container button.theme-simple:hover {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+    color: #93c5fd; /* blue-300 */
+}
+
+.actioncrumb-container button.theme-rounded {
+    border-radius: var(--actioncrumb-border-radius-full);
+    transition: all var(--actioncrumb-transition-normal);
+    color: #64748b; /* slate-500 */
+}
+
+.actioncrumb-container button.theme-rounded:hover {
+    background-color: #dbeafe; /* blue-100 */
+    color: #1e40af; /* blue-800 */
+}
+
+.dark .actioncrumb-container button.theme-rounded:hover {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+    color: #93c5fd; /* blue-300 */
+}
+
+.actioncrumb-container button.theme-square {
+    border-radius: 0;
+    border: 1px solid transparent;
+    transition: all var(--actioncrumb-transition-fast);
+    color: #64748b; /* slate-500 */
+}
+
+.actioncrumb-container button.theme-square:hover {
+    background-color: #dbeafe; /* blue-100 */
+    border-color: #3b82f6; /* blue-500 */
+    color: #1e40af; /* blue-800 */
+}
+
+.dark .actioncrumb-container button.theme-square:hover {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+    border-color: #60a5fa; /* blue-400 */
+    color: #93c5fd; /* blue-300 */
+}
+
+/* Dropdown positioning fixes - minimal CSS for functionality */
+.actioncrumb-dropdown-portal {
+    /* Use fixed positioning to escape parent overflow constraints */
+    position: fixed;
+    /* Ensure proper layering above all content */
+    z-index: 50;
+    /* Position will be set by JavaScript */
+    top: 0;
+    left: 0;
+}
+
+/* =================================================================
+   FLAT COLOR UTILITIES
+   ================================================================= */
+
+.actioncrumb-flat-bg-primary {
+    background-color: #3b82f6; /* blue-500 */
+}
+
+.actioncrumb-flat-bg-primary-light {
+    background-color: #dbeafe; /* blue-100 */
+}
+
+.dark .actioncrumb-flat-bg-primary-light {
+    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
+}
+
+.actioncrumb-flat-border-primary {
+    border-color: #3b82f6; /* blue-500 */
+}
+
+.actioncrumb-flat-text-primary {
+    color: #1e40af; /* blue-800 */
+}
+
+.dark .actioncrumb-flat-text-primary {
+    color: #93c5fd; /* blue-300 */
+}
+
+/* Simple Modal Backdrop for Flat Design */
+.actioncrumb-modal-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    transition: background-color var(--actioncrumb-transition-normal);
+}
+
+.dark .actioncrumb-modal-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* =================================================================
+   MOBILE & RESPONSIVE STYLES
+   ================================================================= */
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+    .actioncrumb-container button,
+    .actioncrumb-container a {
+        min-height: 44px; /* iOS recommended touch target */
+        min-width: 44px;
+    }
+}
+
+/* Improved mobile spacing and scroll behavior */
+@media (max-width: 768px) {
+    /* More compact spacing on mobile */
+    .actioncrumb-container nav {
+        gap: var(--actioncrumb-spacing-xs);
+        padding-right: 1rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .actioncrumb-container .space-x-2 > * + * {
+        margin-left: var(--actioncrumb-spacing-xs);
+    }
+    
+    .actioncrumb-container .space-x-1 > * + * {
+        margin-left: 0.0625rem; /* Even tighter */
+    }
+    
+    /* Better mobile breadcrumb item styling */
+    .actioncrumb-container nav a,
+    .actioncrumb-container nav span {
+        min-height: 44px;
+        line-height: 1.2;
+        max-width: 100px; /* Narrower on mobile */
+        padding: var(--actioncrumb-spacing-sm) !important;
+    }
+    
+    /* Compact theme styles on mobile */
+    .actioncrumb-container .theme-simple .actioncrumb-step {
+        padding: var(--actioncrumb-spacing-xs) var(--actioncrumb-spacing-sm);
+    }
+    
+    .actioncrumb-container .theme-rounded .actioncrumb-step {
+        padding: var(--actioncrumb-spacing-xs) var(--actioncrumb-spacing-md);
+    }
+    
+    .actioncrumb-container .theme-square .actioncrumb-step {
+        padding: var(--actioncrumb-spacing-xs) var(--actioncrumb-spacing-md);
+    }
+    
+    /* Tighter dropdown button spacing */
+    .actioncrumb-container .ml-1 {
+        margin-left: var(--actioncrumb-spacing-xs) !important;
+    }
+    
+    .actioncrumb-container .rtl .mr-1 {
+        margin-right: var(--actioncrumb-spacing-xs) !important;
+    }
+    
+    /* Adjust separator spacing for compact breadcrumb */
+    .actioncrumb-container svg {
+        margin-left: var(--actioncrumb-spacing-md) !important;
+        margin-right: var(--actioncrumb-spacing-md) !important;
+        min-width: 1rem;
+        min-height: 1rem;
+    }
+
+    /* Mobile dropdown menu adjustments */
+    .actioncrumb-dropdown-menu {
+        max-width: calc(100vw - 2rem);
+        min-width: 10rem;
+    }
+}
+
+/* =================================================================
+   TAILWIND SAFELIST CLASSES
+   ================================================================= */
+
+/* Background colors for all supported theme colors */
+@source inline("{hover:,dark:,dark:hover:}bg-blue-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-red-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-green-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-yellow-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-purple-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-pink-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-gray-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-slate-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-stone-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-zinc-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-neutral-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-orange-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-amber-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-lime-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-emerald-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-teal-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-cyan-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-sky-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-indigo-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-violet-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-fuchsia-{50,100,600,700,800,900/20,900/30,900/50}");
+@source inline("{hover:,dark:,dark:hover:}bg-rose-{50,100,600,700,800,900/20,900/30,900/50}");
+
+/* Text colors for all supported theme colors */
+@source inline("{hover:,dark:,dark:hover:}text-blue-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-red-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-green-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-yellow-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-purple-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-pink-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-gray-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-slate-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-stone-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-zinc-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-neutral-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-orange-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-amber-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-lime-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-emerald-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-teal-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-cyan-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-sky-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-indigo-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-violet-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-fuchsia-{300,400,500,600,700,800,900}");
+@source inline("{hover:,dark:,dark:hover:}text-rose-{300,400,500,600,700,800,900}");
+
+/* Border colors for all supported theme colors */
+@source inline("{hover:,dark:,dark:hover:}border-blue-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-red-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-green-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-yellow-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-purple-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-pink-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-gray-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-slate-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-stone-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-zinc-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-neutral-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-orange-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-amber-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-lime-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-emerald-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-teal-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-cyan-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-sky-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-indigo-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-violet-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-fuchsia-{200,300,400,500,600,700}");
+@source inline("{hover:,dark:,dark:hover:}border-rose-{200,300,400,500,600,700}");
+
+/* Core ActionCrumb utility classes */
+@source inline("inline-flex items-center justify-center");
+@source inline("px-{2,3,4} py-{1,1.5,2}");
+@source inline("rounded-full border border-2");
+@source inline("text-{white,xs,sm} font-medium");
+@source inline("transition-colors duration-{150,200}");
+@source inline("cursor-pointer hover:bg-opacity-10");
+@source inline("space-x-{1,2} rtl:space-x-reverse");
+@source inline("flex-shrink-0 min-w-40");
+@source inline("absolute relative fixed z-{50,999999}");
+@source inline("mt-1 left-0 right-0 rtl:left-auto rtl:right-0");
+@source inline("bg-{white,gray-100} dark:bg-{gray-700,gray-800}");
+@source inline("text-gray-{500,700,900} dark:text-gray-{100,200,300,400}");
+@source inline("shadow-lg rounded-md overflow-x-auto scrollbar-hide");
+
+/* Mobile and responsive utilities */
+@source inline("min-h-44 min-w-44 max-w-120");
+@source inline("w-{4,5,6} h-{4,5,6}");
+@source inline("mr-{2,3} ml-{2,3} rtl:mr-0 rtl:ml-0");
+@source inline("text-left rtl:text-right");
+@source inline("-webkit-overflow-scrolling-touch");
+
+/* Alpine.js and interaction utilities */
+@source inline("opacity-50 cursor-not-allowed");
+@source inline("transform translate-y-4 scale-95");
+@source inline("ease-{in,out} duration-{200,300}");
+@source inline("backdrop-blur-4 backdrop-filter");
+@source inline("isolation-isolate will-change-transform");

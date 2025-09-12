@@ -1,92 +1,269 @@
-<nav class="{{ $config->getContainerClasses() }}" role="navigation" aria-label="Breadcrumb">
-    @foreach($steps as $index => $step)
-        @if($step->isVisible())
-        <div class="flex items-center">
-            @if($step->hasActions() && $config->isDropdownsEnabled())
-                {{-- Step with dropdown actions - separate link and dropdown --}}
-                <div class="flex items-center">
-                    {{-- Step link --}}
-                    @if($step->isClickable())
-                        <a 
-                            href="{{ $step->getResolvedUrl() }}" 
-                            class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}"
-                            wire:navigate>
-                            @if($step->getIcon())
-                                <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-1 rtl:mr-0 rtl:ml-1" />
-                            @endif
-                            {{ $step->getLabel() }}
-                        </a>
-                    @else
-                        <span class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}">
-                            @if($step->getIcon())
-                                <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-1 rtl:mr-0 rtl:ml-1" />
-                            @endif
-                            {{ $step->getLabel() }}
-                        </span>
+@php
+    $isMobileDevice = false;
+    $shouldUseCompactMenu = false;
+
+    try {
+        if (app()->bound(\Hdaklue\Actioncrumb\Services\MobileDetector::class)) {
+            $mobileDetector = app(\Hdaklue\Actioncrumb\Services\MobileDetector::class);
+            $isMobileDevice = $mobileDetector->isMobileOrTablet();
+        } else {
+            // Fallback detection
+            $userAgent = request()->userAgent() ?? '';
+            $isMobileDevice = (bool) preg_match(
+                '/Mobile|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i',
+                $userAgent,
+            );
+        }
+        $shouldUseCompactMenu = $config->isCompactMenuOnMobile() && $isMobileDevice;
+    } catch (\Exception $e) {
+        // Safe fallback - disable compact menu on any error
+        $isMobileDevice = false;
+        $shouldUseCompactMenu = false;
+    }
+@endphp
+
+<div x-data="{
+    showBreadcrumbModal: false,
+    showActionsModal: false,
+    currentStep: null,
+    isMobileDevice: @js($isMobileDevice),
+    isCompactMenu: @js($shouldUseCompactMenu)
+}" class="actioncrumb-container overflow-y-visible">
+
+    @if ($shouldUseCompactMenu)
+        {{-- Mobile Modal View --}}
+        <nav class="{{ $config->getContainerClasses() }} justify-between" role="navigation" aria-label="Breadcrumb">
+            {{-- Current/Last Step --}}
+            @php $lastVisibleStep = collect($steps)->filter(fn($s) => $s->isVisible())->last(); @endphp
+            @if ($lastVisibleStep)
+                <div class="flex min-w-0 flex-1 items-center">
+                    @if ($lastVisibleStep->getIcon())
+                        <x-icon name="{{ $lastVisibleStep->getIcon() }}"
+                            class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500" />
                     @endif
-                    
-                    {{-- Dropdown arrow (separate from link) --}}
-                    <div x-data="{ open: false }" class="relative ml-1 rtl:ml-0 rtl:mr-1">
-                        <button 
-                            @click="open = !open" 
-                            @click.away="open = false"
-                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                            <x-icon name="heroicon-o-chevron-down" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        </button>
-                        
-                        <div 
-                            x-show="open" 
-                            x-transition
-                            class="{{ $config->getDropdownMenuClasses() }}"
-                            @click="open = false">
-                            @foreach($step->getActions() as $actionIndex => $action)
-                                @if($action->isVisible())
-                                    @if($action->hasSeparator() && !$loop->first)
-                                        <hr class="my-1 border-gray-200 dark:border-gray-600">
-                                    @endif
-                                    
-                                    <button 
-                                        wire:click="handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}')"
-                                        class="{{ $config->getDropdownItemClasses() }} {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                        {{ !$action->isEnabled() ? 'disabled' : '' }}>
-                                        @if($action->getIcon())
-                                            <x-icon name="{{ $action->getIcon() }}" class="w-4 h-4 text-gray-400" />
+                    <span class="truncate font-medium text-gray-900 dark:text-gray-100">
+                        {{ $lastVisibleStep->getLabel() }}
+                    </span>
+                </div>
+
+                {{-- Navigation Button --}}
+                <button @click="showBreadcrumbModal = true"
+                    class="ml-3 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                    <x-icon name="heroicon-o-bars-3" class="h-5 w-5" />
+                </button>
+            @endif
+        </nav>
+
+        {{-- Modals --}}
+        @include('actioncrumb::components.modals.breadcrumb-list')
+    @else
+        {{-- Desktop/Default Horizontal Scroll View --}}
+        <nav x-data="{
+            isMobile: window.innerWidth <= 768,
+            scrollToEnd() {
+                if (this.isMobile && this.$el.scrollWidth > this.$el.clientWidth) {
+                    // Scroll to show the current/last breadcrumb
+                    this.$el.scrollTo({
+                        left: this.$el.scrollWidth - this.$el.clientWidth,
+                        behavior: 'smooth'
+                    });
+                }
+            },
+            handleResize() {
+                this.isMobile = window.innerWidth <= 768;
+                this.scrollToEnd();
+            }
+        }" x-init="// Initial scroll after content loads
+        $nextTick(() => {
+            setTimeout(() => scrollToEnd(), 100);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => handleResize());
+
+        // Handle device orientation change
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                handleResize();
+            }, 200);
+        });"
+            class="{{ $config->getContainerClasses() }} scrollbar-hide overflow-x-auto overflow-y-visible"
+            role="navigation" aria-label="Breadcrumb">
+            @foreach ($steps as $index => $step)
+                @if ($step->isVisible())
+                    <div class="flex flex-shrink-0 items-center">
+                        @if ($step->hasActions() && $config->isDropdownsEnabled())
+                            {{-- Step with dropdown actions - separate link and dropdown --}}
+                            <div class="flex flex-shrink-0 items-center {{ $config->getStepContainerClasses($step->isCurrent()) }}">
+                                {{-- Step link --}}
+                                @if ($step->isClickable())
+                                    <a href="{{ $step->getResolvedUrl() }}"
+                                        class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent(), true) }}"
+                                        wire:navigate>
+                                        @if ($step->getIcon())
+                                            <x-icon name="{{ $step->getIcon() }}"
+                                                class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
                                         @endif
-                                        <span>{{ $action->getLabel() }}</span>
-                                    </button>
+                                        {{ $step->getLabel() }}
+                                    </a>
+                                @else
+                                    <span
+                                        class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent(), true) }}">
+                                        @if ($step->getIcon())
+                                            <x-icon name="{{ $step->getIcon() }}"
+                                                class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
+                                        @endif
+                                        {{ $step->getLabel() }}
+                                    </span>
                                 @endif
-                            @endforeach
-                        </div>
+
+                                {{-- Dropdown arrow (separate from link) --}}
+                                <div x-data="{
+                                    open: false,
+                                    isMobile: window.innerWidth <= 768,
+                                    init() {
+                                        window.addEventListener('resize', () => {
+                                            this.isMobile = window.innerWidth <= 768;
+                                            if (!this.isMobile) this.open = false; // Close dropdown when switching to mobile
+                                            if (this.open) this.positionDropdown();
+                                        });
+                                        
+                                        window.addEventListener('scroll', () => {
+                                            if (this.open) this.positionDropdown();
+                                        });
+                                    },
+                                    toggleDropdown() {
+                                        this.open = !this.open;
+                                        if (this.open) {
+                                            this.$nextTick(() => this.positionDropdown());
+                                        }
+                                    },
+                                    closeDropdown() {
+                                        this.open = false;
+                                    },
+                                    positionDropdown() {
+                                        if (!this.open || this.isMobile) return;
+                                        
+                                        const dropdown = this.$refs.dropdown;
+                                        const button = this.$refs.dropdownButton;
+                                        if (!dropdown || !button) return;
+                                        
+                                        // Get button position relative to viewport
+                                        const buttonRect = button.getBoundingClientRect();
+                                        const viewportWidth = window.innerWidth;
+                                        const viewportHeight = window.innerHeight;
+                                        
+                                        // Position dropdown below button
+                                        let top = buttonRect.bottom + 4;
+                                        let left = buttonRect.left;
+                                        
+                                        // Apply initial position
+                                        dropdown.style.top = `${top}px`;
+                                        dropdown.style.left = `${left}px`;
+                                        dropdown.style.right = 'auto';
+                                        dropdown.style.bottom = 'auto';
+                                        
+                                        // Check positioning after initial placement
+                                        this.$nextTick(() => {
+                                            const dropdownRect = dropdown.getBoundingClientRect();
+                                            
+                                            // Adjust horizontal position if off-screen
+                                            if (dropdownRect.right > viewportWidth - 10) {
+                                                dropdown.style.left = 'auto';
+                                                dropdown.style.right = `${viewportWidth - buttonRect.right}px`;
+                                            }
+                                            
+                                            // Adjust vertical position if off-screen
+                                            if (dropdownRect.bottom > viewportHeight - 10) {
+                                                dropdown.style.top = 'auto';
+                                                dropdown.style.bottom = `${viewportHeight - buttonRect.top + 4}px`;
+                                            }
+                                        });
+                                    }
+                                }" 
+                                @click.away="closeDropdown()" 
+                                class="relative ml-1 rtl:ml-0 rtl:mr-1">
+                                    {{-- Mobile: Use modal button --}}
+                                    <button x-show="isMobile" x-cloak
+                                        @click="currentStep = {{ $index }}; showActionsModal = true"
+                                        class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                                        <x-icon name="heroicon-o-ellipsis-vertical" class="h-5 w-5" />
+                                    </button>
+
+                                    {{-- Desktop: Use dropdown --}}
+                                    <button x-show="!isMobile" x-cloak 
+                                        x-ref="dropdownButton"
+                                        @click="toggleDropdown()"
+                                        class="{{ $config->getDropdownTriggerClasses($step->isCurrent()) }}">
+                                        <x-icon name="heroicon-o-chevron-down"
+                                            class="h-4 w-4" />
+                                    </button>
+
+                                    <div x-show="open && !isMobile" x-cloak
+                                        x-ref="dropdown"
+                                        class="actioncrumb-dropdown-portal {{ $config->getDropdownMenuClasses() }}" 
+                                        @click.stop="">
+                                        @foreach ($step->getActions() as $actionIndex => $action)
+                                            @if ($action->isVisible())
+                                                @if ($action->hasSeparator() && !$loop->first)
+                                                    <hr class="my-1 border-gray-200 dark:border-gray-600">
+                                                @endif
+
+                                                <button
+                                                    wire:click="handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}')"
+                                                    @click.stop="closeDropdown()"
+                                                    class="{{ $config->getDropdownItemClasses() }} {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                    {{ !$action->isEnabled() ? 'disabled' : '' }}>
+                                                    @if ($action->getIcon())
+                                                        <x-icon name="{{ $action->getIcon() }}"
+                                                            class="h-4 w-4 text-gray-400" />
+                                                    @endif
+                                                    <span>{{ $action->getLabel() }}</span>
+                                                </button>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($step->isClickable())
+                            {{-- Clickable step without actions --}}
+                            <div class="{{ $config->getStepContainerClasses($step->isCurrent()) }}">
+                                <a href="{{ $step->getResolvedUrl() }}"
+                                    class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}"
+                                    wire:navigate>
+                                    @if ($step->getIcon())
+                                        <x-icon name="{{ $step->getIcon() }}"
+                                            class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
+                                    @endif
+                                    {{ $step->getLabel() }}
+                                </a>
+                            </div>
+                        @else
+                            {{-- Current or inactive step --}}
+                            <div class="{{ $config->getStepContainerClasses($step->isCurrent()) }}">
+                                <span class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}">
+                                    @if ($step->getIcon())
+                                        <x-icon name="{{ $step->getIcon() }}"
+                                            class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
+                                    @endif
+                                    {{ $step->getLabel() }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
-                </div>
-            @elseif($step->isClickable())
-                {{-- Clickable step without actions --}}
-                <a 
-                    href="{{ $step->getResolvedUrl() }}" 
-                    class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}"
-                    wire:navigate>
-                    @if($step->getIcon())
-                        <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-1 rtl:mr-0 rtl:ml-1" />
+
+                    @if (!$loop->last)
+                        {{-- Configurable Separator --}}
+                        <div class="flex items-center justify-center">
+                            {!! $config->getSeparatorType()->getSvg() !!}
+                        </div>
                     @endif
-                    {{ $step->getLabel() }}
-                </a>
-            @else
-                {{-- Current or inactive step --}}
-                <span class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent()) }}">
-                    @if($step->getIcon())
-                        <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-1 rtl:mr-0 rtl:ml-1" />
-                    @endif
-                    {{ $step->getLabel() }}
-                </span>
-            @endif
-        </div>
-        
-            @if(!$loop->last)
-                {{-- Configurable Separator --}}
-                <div class="flex items-center justify-center">
-                    {!! $config->getSeparatorType()->getSvg() !!}
-                </div>
-            @endif
-        @endif
-    @endforeach
-</nav>
+                @endif
+            @endforeach
+        </nav>
+
+    @endif
+
+    {{-- Always include modals for mobile dropdown actions regardless of compactMenuOnMobile setting --}}
+    @include('actioncrumb::components.modals.actions-list')
+</div>
