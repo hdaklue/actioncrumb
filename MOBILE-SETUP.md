@@ -28,6 +28,7 @@ ActioncrumbConfig::make()
 - Mobile/Tablet: Full breadcrumb with horizontal scroll + auto-scroll to end
 - Desktop: Normal breadcrumb display
 
+
 ## Features
 
 ### Mobile Dropdown Actions
