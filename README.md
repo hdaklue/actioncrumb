@@ -106,6 +106,7 @@ class UsersManagement extends Component
 
 **2. Render in Your Blade Template**
 
+
 ```blade
 <div>
     <!-- Render your actioncrumbs -->
