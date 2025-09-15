@@ -36,19 +36,19 @@
             {{-- Current/Last Step --}}
             @php $lastVisibleStep = collect($steps)->filter(fn($s) => $s->isVisible())->last(); @endphp
             @if ($lastVisibleStep)
-                <div class="flex min-w-0 flex-1 items-center">
+                <div class="{{ $config->getMobileCurrentStepContainerClasses() }}">
                     @if ($lastVisibleStep->getIcon())
                         <x-icon name="{{ $lastVisibleStep->getIcon() }}"
-                            class="mr-2 h-4 w-4 flex-shrink-0 text-gray-500" />
+                            class="mr-2 h-4 w-4 flex-shrink-0 text-{{ $config->getSecondaryColor()->value }}-500" />
                     @endif
-                    <span class="truncate font-medium text-gray-900 dark:text-gray-100">
+                    <span class="{{ $config->getCurrentStepMobileLabelClasses() }}">
                         {{ $lastVisibleStep->getLabel() }}
                     </span>
                 </div>
 
                 {{-- Navigation Button --}}
                 <button @click="showBreadcrumbModal = true"
-                    class="ml-3 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                    class="{{ $config->getMobileButtonClasses() }}">
                     <x-icon name="heroicon-o-bars-3" class="h-5 w-5" />
                 </button>
             @endif
@@ -186,7 +186,7 @@
                                     {{-- Mobile: Use modal button --}}
                                     <button x-show="isMobile" x-cloak
                                         @click="currentStep = {{ $index }}; showActionsModal = true"
-                                        class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                                        class="{{ $config->getMobileButtonClasses() }}">
                                         <x-icon name="heroicon-o-ellipsis-vertical" class="h-5 w-5" />
                                     </button>
 
@@ -201,12 +201,13 @@
 
                                     <div x-show="open && !isMobile" x-cloak
                                         x-ref="dropdown"
-                                        class="actioncrumb-dropdown-portal {{ $config->getDropdownMenuClasses() }}" 
-                                        @click.stop="">
+                                        class="actioncrumb-dropdown-portal {{ $config->getDropdownMenuClasses() }} fixed z-50" 
+                                        @click.stop="" 
+                                        style="position: fixed;">
                                         @foreach ($step->getActions() as $actionIndex => $action)
                                             @if ($action->isVisible())
                                                 @if ($action->hasSeparator() && !$loop->first)
-                                                    <hr class="my-1 border-gray-200 dark:border-gray-600">
+                                                    <hr class="{{ $config->getDropdownSeparatorClasses() }}">
                                                 @endif
 
                                                 <button
@@ -216,7 +217,7 @@
                                                     {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                                     @if ($action->getIcon())
                                                         <x-icon name="{{ $action->getIcon() }}"
-                                                            class="h-4 w-4 text-gray-400" />
+                                                            class="{{ $config->getActionIconClasses() }}" />
                                                     @endif
                                                     <span>{{ $action->getLabel() }}</span>
                                                 </button>

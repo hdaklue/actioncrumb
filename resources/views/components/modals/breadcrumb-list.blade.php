@@ -12,7 +12,7 @@
     style="display: none;">
     
     {{-- Backdrop --}}
-    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div class="{{ $config->getMobileModalBackdropClasses() }}"></div>
     
     {{-- Modal Content --}}
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -24,16 +24,16 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0">
+            class="{{ $config->getMobileModalContainerClasses() }}">
             
             {{-- Header --}}
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+                <h3 class="{{ $config->getMobileModalHeaderClasses() }}">
                     Navigation
                 </h3>
                 <button 
                     @click="showBreadcrumbModal = false"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    class="{{ $config->getMobileModalCloseButtonClasses() }}">
                     <x-icon name="heroicon-o-x-mark" class="w-6 h-6" />
                 </button>
             </div>
@@ -42,10 +42,10 @@
             <nav class="space-y-2">
                 @foreach($steps as $index => $step)
                     @if($step->isVisible())
-                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center flex-1 min-h-[2.5rem]">
+                        <div class="{{ $config->getMobileModalItemClasses() }}">
+                            <div class="{{ $config->getMobileModalItemContentClasses() }}">
                                 @if($step->getIcon())
-                                    <x-icon name="{{ $step->getIcon() }}" class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" />
+                                    <x-icon name="{{ $step->getIcon() }}" class="{{ $config->getMobileModalIconClasses() }}" />
                                 @endif
                                 
                                 @if($step->isClickable())
@@ -66,8 +66,8 @@
                             {{-- Action Button --}}
                             @if($step->hasActions() && $config->isDropdownsEnabled())
                                 <button 
-                                    @click="currentStep = {{ $index }}; showActionsModal = true"
-                                    class="ml-3 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full transition-colors">
+                                    @click="currentStep = {{ $index }}; showBreadcrumbModal = false; showActionsModal = true"
+                                    class="{{ $config->getMobileModalActionButtonClasses() }}">
                                     <x-icon name="heroicon-o-ellipsis-vertical" class="w-5 h-5" />
                                 </button>
                             @endif

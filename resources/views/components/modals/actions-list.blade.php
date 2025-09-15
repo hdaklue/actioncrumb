@@ -12,7 +12,7 @@
     style="display: none;">
     
     {{-- Backdrop --}}
-    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div class="{{ $config->getMobileModalBackdropClasses() }}"></div>
     
     {{-- Modal Content --}}
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -24,16 +24,16 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0">
+            class="{{ $config->getMobileModalContainerClasses() }}">
             
             {{-- Header --}}
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+                <h3 class="{{ $config->getMobileModalHeaderClasses() }}">
                     Actions
                 </h3>
                 <button 
                     @click="showActionsModal = false"
-                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    class="{{ $config->getMobileModalCloseButtonClasses() }}">
                     <x-icon name="heroicon-o-x-mark" class="w-6 h-6" />
                 </button>
             </div>
@@ -46,18 +46,18 @@
                             @foreach($step->getActions() as $actionIndex => $action)
                                 @if($action->isVisible())
                                     @if($action->hasSeparator() && !$loop->first)
-                                        <hr class="my-2 border-gray-200 dark:border-gray-600">
+                                        <hr class="{{ $config->getMobileModalSeparatorClasses() }}">
                                     @endif
                                     
                                     <button 
-                                        @click="$wire.handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); showActionsModal = false"
-                                        class="w-full flex items-center px-3 py-3 min-h-[2.5rem] text-left text-gray-700 dark:text-gray-200 rounded-lg transition-colors {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700' }}"
+                                        @click="{{ $action->isEnabled() ? '$wire.handleActioncrumbAction(\'' . md5($step->getLabel() . $action->getLabel() . $actionIndex) . '\', \'' . md5($step->getLabel()) . '\'); showActionsModal = false' : '' }}"
+                                        class="{{ $config->getMobileModalActionItemClasses($action->isEnabled()) }}"
                                         {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                         
                                         @if($action->getIcon())
-                                            <x-icon name="{{ $action->getIcon() }}" class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" />
+                                            <x-icon name="{{ $action->getIcon() }}" class="w-5 h-5 mr-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
                                         @else
-                                            <x-icon name="heroicon-o-squares-2x2" class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" />
+                                            <x-icon name="heroicon-o-squares-2x2" class="w-5 h-5 mr-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
                                         @endif
                                         
                                         <span class="font-medium flex-1 flex items-center">{{ $action->getLabel() }}</span>
@@ -70,7 +70,7 @@
             </div>
             
             {{-- Empty State --}}
-            <div x-show="currentStep === null" x-cloak class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div x-show="currentStep === null" x-cloak class="text-center py-8 text-{{ $config->getSecondaryColor()->value }}-500 dark:text-{{ $config->getSecondaryColor()->value }}-400">
                 No actions available
             </div>
         </div>
