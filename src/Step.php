@@ -4,9 +4,10 @@ namespace Hdaklue\Actioncrumb;
 
 class Step
 {
-    protected string $label;
+    protected string $id;
+    protected string|\Closure|null $label = null;
     protected ?string $icon = null;
-    protected ?string $url = null;
+    protected string|\Closure|null $url = null;
     protected ?string $route = null;
     protected array $routeParams = [];
     protected array $actions = [];
@@ -14,14 +15,14 @@ class Step
     protected bool|\Closure $visible = true;
     protected bool|\Closure $enabled = true;
 
-    public function __construct(string $label)
+    public function __construct(string $id)
     {
-        $this->label = $label;
+        $this->id = $id;
     }
 
-    public static function make(string $label): self
+    public static function make(string $id): self
     {
-        return new static($label);
+        return new static($id);
     }
 
     public function icon(string $icon): self
@@ -30,11 +31,17 @@ class Step
         return $this;
     }
 
-    public function url(string $url): self
+    public function url(string|\Closure $url): self
     {
         $this->url = $url;
         $this->route = null;
         $this->routeParams = [];
+        return $this;
+    }
+
+    public function label(string|\Closure $label): self
+    {
+        $this->label = $label;
         return $this;
     }
 
@@ -70,9 +77,20 @@ class Step
         return $this;
     }
 
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
     public function getLabel(): string
     {
-        return $this->label;
+        if ($this->label === null) {
+            return $this->id;
+        }
+        
+        return is_callable($this->label)
+            ? call_user_func($this->label)
+            : $this->label;
     }
 
     public function getIcon(): ?string
@@ -82,7 +100,9 @@ class Step
 
     public function getUrl(): ?string
     {
-        return $this->url;
+        return is_callable($this->url)
+            ? call_user_func($this->url)
+            : $this->url;
     }
 
     public function getRoute(): ?string
@@ -145,6 +165,6 @@ class Step
             return route($this->route, $this->routeParams);
         }
 
-        return $this->url;
+        return $this->getUrl();
     }
 }

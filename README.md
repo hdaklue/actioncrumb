@@ -42,6 +42,7 @@ Dashboard > Users ⌄ > Profile ⌄
 - PHP 8.2+
 - Laravel 11.0+ / 12.0+
 - Livewire 3.0+
+- Filament Actions 4.0+ (for advanced action integration)
 - Tailwind CSS 4.0+
 - Alpine.js 3.0+
 
@@ -121,6 +122,314 @@ class UsersManagement extends Component
 
 **That's it!** Your breadcrumbs are now interactive with dropdown actions.
 
+## Filament Actions Integration 🔥
+
+ActionCrumb seamlessly integrates with **Filament Actions** for powerful modal-based workflows and form handling.
+
+### WireAction - Execute Filament Actions from Breadcrumbs
+
+The `WireAction` class allows you to execute Filament Actions directly from breadcrumb dropdowns:
+
+```php
+<?php
+
+namespace App\Livewire\Admin;
+
+use Livewire\Component;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\{Step, Action};
+use Filament\Actions\Action as FilamentAction;
+
+class UsersManagement extends Component implements HasActions, HasSchemas
+{
+    use HasActionCrumbs;
+    use InteractsWithActions;
+    use InteractsWithSchemas;
+    
+    protected function actioncrumbs(): array
+    {
+        return [
+            Step::make('Dashboard')
+                ->icon('heroicon-o-home')
+                ->url('/dashboard'),
+                
+            Step::make('Users')
+                ->icon('heroicon-o-users')
+                ->current()
+                ->actions([
+                    // Execute Filament Actions through WireAction
+                    WireAction::make('Create User')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('createUser'),
+                        
+                    WireAction::make('Import Users')
+                        ->livewire($this)
+                        ->icon('heroicon-o-arrow-up-tray')
+                        ->execute('importUsers'),
+                        
+                    WireAction::make('Export All')
+                        ->livewire($this)
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->execute('exportUsers'),
+                ])
+        ];
+    }
+    
+    // Define your Filament Actions
+    public function createUserAction(): FilamentAction
+    {
+        return FilamentAction::make('createUser')
+            ->label('Create New User')
+            ->icon('heroicon-o-plus')
+            ->form([
+                \Filament\Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                \Filament\Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                \Filament\Forms\Components\Select::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'user' => 'User',
+                        'manager' => 'Manager',
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                \App\Models\User::create($data);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('User created successfully!')
+                    ->success()
+                    ->send();
+            });
+    }
+    
+    public function importUsersAction(): FilamentAction
+    {
+        return FilamentAction::make('importUsers')
+            ->label('Import Users from CSV')
+            ->icon('heroicon-o-arrow-up-tray')
+            ->form([
+                \Filament\Forms\Components\FileUpload::make('csv_file')
+                    ->label('CSV File')
+                    ->acceptedFileTypes(['text/csv', 'application/csv'])
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                // Handle CSV import logic
+                $this->processUserImport($data['csv_file']);
+            });
+    }
+    
+    public function exportUsersAction(): FilamentAction
+    {
+        return FilamentAction::make('exportUsers')
+            ->label('Export All Users')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->action(function () {
+                // Handle export logic
+                return response()->download($this->generateUserExport());
+            });
+    }
+    
+    // ... rest of your component
+}
+```
+
+### WireCrumb - Dedicated Filament Action Components
+
+For complex workflows, extend the `WireCrumb` abstract component:
+
+```php
+<?php
+
+namespace App\Livewire\Admin;
+
+use Hdaklue\Actioncrumb\Components\WireCrumb;
+use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\{Step};
+use Filament\Actions\Action as FilamentAction;
+use App\Models\User;
+
+class UserProfileCrumb extends WireCrumb
+{
+    public ?User $user = null;
+    
+    public function mount($record = null, $parent = null)
+    {
+        parent::mount($record, $parent);
+        $this->user = $record;
+    }
+    
+    protected function actioncrumbs(): array
+    {
+        return [
+            Step::make('Dashboard')->url('/dashboard'),
+            Step::make('Users')->url('/admin/users'),
+            Step::make($this->user->name ?? 'User')
+                ->current()
+                ->actions([
+                    WireAction::make('Edit Profile')
+                        ->livewire($this)
+                        ->icon('heroicon-o-pencil')
+                        ->execute('editProfile'),
+                        
+                    WireAction::make('Change Password')
+                        ->livewire($this)
+                        ->icon('heroicon-o-key')
+                        ->execute('changePassword'),
+                        
+                    WireAction::make('Suspend User')
+                        ->livewire($this)
+                        ->icon('heroicon-o-no-symbol')
+                        ->execute('suspendUser')
+                        ->validated(auth()->user()->can('suspend', $this->user)),
+                ])
+        ];
+    }
+    
+    public function editProfileAction(): FilamentAction
+    {
+        return FilamentAction::make('editProfile')
+            ->form([
+                \Filament\Forms\Components\TextInput::make('name')
+                    ->default($this->user->name)
+                    ->required(),
+                \Filament\Forms\Components\TextInput::make('email')
+                    ->default($this->user->email)
+                    ->email()
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $this->user->update($data);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Profile updated successfully!')
+                    ->success()
+                    ->send();
+            });
+    }
+    
+    public function changePasswordAction(): FilamentAction
+    {
+        return FilamentAction::make('changePassword')
+            ->form([
+                \Filament\Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required()
+                    ->minLength(8),
+                \Filament\Forms\Components\TextInput::make('password_confirmation')
+                    ->password()
+                    ->same('password')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $this->user->update([
+                    'password' => bcrypt($data['password'])
+                ]);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Password changed successfully!')
+                    ->success()
+                    ->send();
+            });
+    }
+    
+    public function suspendUserAction(): FilamentAction
+    {
+        return FilamentAction::make('suspendUser')
+            ->requiresConfirmation()
+            ->modalHeading('Suspend User')
+            ->modalDescription('Are you sure you want to suspend this user?')
+            ->modalSubmitActionLabel('Yes, suspend')
+            ->action(function () {
+                $this->user->update(['suspended_at' => now()]);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('User suspended successfully!')
+                    ->success()
+                    ->send();
+                    
+                return redirect('/admin/users');
+            });
+    }
+}
+```
+
+Then render it in your Blade view:
+
+```blade
+<livewire:admin.user-profile-crumb :record="$user" />
+```
+
+### Bulk WireAction Creation
+
+Create multiple actions efficiently:
+
+```php
+protected function actioncrumbs(): array
+{
+    $bulkActions = WireAction::bulk($this, [
+        [
+            'label' => 'Create Document',
+            'action' => 'createDocument',
+            'icon' => 'heroicon-o-document-plus',
+        ],
+        [
+            'label' => 'Import Documents',
+            'action' => 'importDocuments',
+            'icon' => 'heroicon-o-arrow-up-tray',
+        ],
+        [
+            'label' => 'Archive All',
+            'action' => 'archiveAll',
+            'icon' => 'heroicon-o-archive-box',
+            'validated' => auth()->user()->can('archive-documents'),
+        ],
+    ]);
+    
+    return [
+        Step::make('Documents')
+            ->current()
+            ->actions($bulkActions)
+    ];
+}
+```
+
+### Advanced Features
+
+**Action Validation:**
+```php
+WireAction::make('Delete User')
+    ->livewire($this)
+    ->validated(auth()->user()->can('delete', $this->user))
+    ->execute('deleteUser');
+```
+
+**Action Parameters:**
+```php
+WireAction::make('Send Email')
+    ->livewire($this)
+    ->parameters(['template' => 'welcome'])
+    ->execute('sendEmail');
+```
+
+**Debugging Actions:**
+```php
+// Get available actions on a component
+$debug = WireAction::debug($this);
+// Returns: ['class' => 'App\Livewire\UsersManagement', 'available_actions' => ['createUser', 'importUsers', ...]]
+```
+
 ## Configuration 🎨
 
 Configure ActionCrumb globally in your `AppServiceProvider` using our fluent configuration API:
@@ -182,6 +491,49 @@ ActioncrumbConfig::make()
 ```
 
 ## Advanced Usage 🔧
+
+### Dynamic Labels and URLs with Closures
+
+```php
+protected function actioncrumbs(): array
+{
+    return [
+        Step::make('dashboard')
+            ->label('Dashboard')
+            ->url('/dashboard'),
+        
+        Step::make('users')
+            ->label('Users')
+            ->route('users.index')
+            ->actions([
+                Action::make('export-users')
+                    ->label(fn() => 'Export ' . $this->users->count() . ' Users')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->execute(fn() => $this->exportUsers()),
+                    
+                Action::make('view-profile')
+                    ->label('View Profile')
+                    ->url(fn() => route('users.show', $this->user->id))
+                    ->visible(fn() => $this->user && auth()->user()->can('view', $this->user)),
+            ]),
+            
+        Step::make('user-profile')
+            ->label(fn() => $this->user->name ?? 'Unknown User')
+            ->current()
+            ->actions([
+                Action::make('toggle-status')
+                    ->label(fn() => $this->user->is_active ? 'Deactivate' : 'Activate')
+                    ->icon(fn() => $this->user->is_active ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->execute(fn() => $this->toggleUserStatus()),
+                    
+                Action::make('send-email')
+                    ->label('Send Email')
+                    ->url(fn() => "mailto:{$this->user->email}")
+                    ->enabled(fn() => !empty($this->user->email)),
+            ])
+    ];
+}
+```
 
 ### Dynamic Actions Based on Permissions
 
@@ -256,23 +608,73 @@ Action::make('Advanced Search')
 ### Step Builder Methods
 
 ```php
-Step::make('Label')
+Step::make('step-id')                           // Unique step ID (used as default label)
+    ->label('Display Label')                    // Override label (string or closure)
     ->icon('heroicon-o-home')                   // Heroicon for the step
-    ->url('/path')                              // Direct URL
+    ->url('/path')                              // Direct URL (string or closure)
     ->route('route.name', ['param' => 'value']) // Named route with parameters
     ->actions([Action::make('...')])            // Array of dropdown actions
     ->current(true)                             // Mark as current/active step
+    ->visible(true)                             // Show/hide step (bool or closure)
+    ->enabled(true)                             // Enable/disable step (bool or closure)
+
+// Getter methods
+->getId()                                       // Returns the unique step ID
+->getLabel()                                    // Returns label or ID if no label set
 ```
 
 ### Action Builder Methods
 
 ```php
-Action::make('Label')
+Action::make('action-id')                       // Unique action ID (used as default label)
+    ->label('Display Label')                    // Override label (string or closure)
     ->icon('heroicon-o-download')               // Heroicon for the action
-    ->url('/path')                              // Navigate to URL
+    ->url('/path')                              // Navigate to URL (string or closure)
     ->route('route.name', ['param' => 'value']) // Navigate to named route
     ->execute(fn() => $this->doSomething())     // Execute closure in component
     ->separator(true)                           // Add visual separator above
+    ->visible(true)                             // Show/hide action (bool or closure)
+    ->enabled(true)                             // Enable/disable action (bool or closure)
+
+// Getter methods
+->getId()                                       // Returns the unique action ID
+->getLabel()                                    // Returns label or ID if no label set
+```
+
+### WireAction Builder Methods (Filament Integration)
+
+```php
+WireAction::make('Label')
+    ->livewire($this)                           // Set Livewire component with HasActions
+    ->icon('heroicon-o-star')                   // Heroicon for the action
+    ->execute('actionName')                     // Execute Filament Action method
+    ->parameters(['key' => 'value'])            // Pass parameters to action
+    ->validated(true)                           // Enable/disable action validation (default: true)
+
+// Static methods
+WireAction::bulk($component, $actions)          // Create multiple actions at once
+WireAction::debug($component)                   // Debug available actions on component
+```
+
+### WireCrumb Abstract Component
+
+```php
+use Hdaklue\Actioncrumb\Components\WireCrumb;
+
+class MyCustomCrumb extends WireCrumb
+{
+    // Required: Implement actioncrumbs method
+    protected function actioncrumbs(): array { /* ... */ }
+    
+    // Optional: Override mount for custom initialization
+    public function mount($record = null, $parent = null) { /* ... */ }
+    
+    // Optional: Override render for custom view
+    public function render() { /* ... */ }
+    
+    // Define your Filament Actions
+    public function myActionMethodAction(): \Filament\Actions\Action { /* ... */ }
+}
 ```
 
 ### Component Integration
@@ -299,6 +701,210 @@ public function handleActionResult($event)
 ```
 
 ## Real-World Examples 🌟
+
+### Filament Admin Panel with Modal Actions
+
+```php
+<?php
+
+namespace App\Livewire\Admin;
+
+use Livewire\Component;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use Hdaklue\Actioncrumb\Support\WireAction;
+use Hdaklue\Actioncrumb\{Step};
+use Filament\Actions\Action as FilamentAction;
+use App\Models\Product;
+
+class ProductManagement extends Component implements HasActions, HasSchemas
+{
+    use HasActionCrumbs;
+    use InteractsWithActions;
+    use InteractsWithSchemas;
+    
+    public ?Product $product = null;
+    
+    protected function actioncrumbs(): array
+    {
+        return [
+            Step::make('Dashboard')
+                ->icon('heroicon-o-home')
+                ->url('/admin'),
+                
+            Step::make('Products')
+                ->icon('heroicon-o-cube')
+                ->route('admin.products.index')
+                ->actions([
+                    WireAction::make('Create Product')
+                        ->livewire($this)
+                        ->icon('heroicon-o-plus')
+                        ->execute('createProduct'),
+                        
+                    WireAction::make('Bulk Import')
+                        ->livewire($this)
+                        ->icon('heroicon-o-arrow-up-tray')
+                        ->execute('bulkImport'),
+                        
+                    WireAction::make('Export Catalog')
+                        ->livewire($this)
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->execute('exportCatalog'),
+                        
+                    WireAction::make('Manage Categories')
+                        ->livewire($this)
+                        ->icon('heroicon-o-tag')
+                        ->execute('manageCategories'),
+                ]),
+                
+            Step::make($this->product?->name ?? 'Product Details')
+                ->current()
+                ->actions([
+                    WireAction::make('Edit Details')
+                        ->livewire($this)
+                        ->icon('heroicon-o-pencil')
+                        ->execute('editProduct'),
+                        
+                    WireAction::make('Update Inventory')
+                        ->livewire($this)
+                        ->icon('heroicon-o-cube')
+                        ->execute('updateInventory'),
+                        
+                    WireAction::make('Archive Product')
+                        ->livewire($this)
+                        ->icon('heroicon-o-archive-box')
+                        ->execute('archiveProduct')
+                        ->validated($this->product && auth()->user()->can('archive', $this->product)),
+                ])
+        ];
+    }
+    
+    public function createProductAction(): FilamentAction
+    {
+        return FilamentAction::make('createProduct')
+            ->label('Create New Product')
+            ->icon('heroicon-o-plus')
+            ->form([
+                \Filament\Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                \Filament\Forms\Components\Textarea::make('description')
+                    ->rows(3),
+                \Filament\Forms\Components\TextInput::make('price')
+                    ->numeric()
+                    ->prefix('$')
+                    ->required(),
+                \Filament\Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->required(),
+                \Filament\Forms\Components\FileUpload::make('images')
+                    ->image()
+                    ->multiple()
+                    ->maxFiles(5),
+            ])
+            ->action(function (array $data) {
+                $product = Product::create($data);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Product created successfully!')
+                    ->success()
+                    ->send();
+                    
+                return redirect()->route('admin.products.show', $product);
+            });
+    }
+    
+    public function editProductAction(): FilamentAction
+    {
+        return FilamentAction::make('editProduct')
+            ->label('Edit Product Details')
+            ->icon('heroicon-o-pencil')
+            ->fillForm([
+                'name' => $this->product->name,
+                'description' => $this->product->description,
+                'price' => $this->product->price,
+                'category_id' => $this->product->category_id,
+            ])
+            ->form([
+                \Filament\Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                \Filament\Forms\Components\Textarea::make('description')
+                    ->rows(3),
+                \Filament\Forms\Components\TextInput::make('price')
+                    ->numeric()
+                    ->prefix('$')
+                    ->required(),
+                \Filament\Forms\Components\Select::make('category_id')
+                    ->relationship('category', 'name')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $this->product->update($data);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Product updated successfully!')
+                    ->success()
+                    ->send();
+            });
+    }
+    
+    public function updateInventoryAction(): FilamentAction
+    {
+        return FilamentAction::make('updateInventory')
+            ->label('Update Inventory')
+            ->icon('heroicon-o-cube')
+            ->fillForm([
+                'stock_quantity' => $this->product->stock_quantity,
+                'low_stock_threshold' => $this->product->low_stock_threshold,
+            ])
+            ->form([
+                \Filament\Forms\Components\TextInput::make('stock_quantity')
+                    ->label('Stock Quantity')
+                    ->numeric()
+                    ->minValue(0)
+                    ->required(),
+                \Filament\Forms\Components\TextInput::make('low_stock_threshold')
+                    ->label('Low Stock Alert Threshold')
+                    ->numeric()
+                    ->minValue(0),
+            ])
+            ->action(function (array $data) {
+                $this->product->update($data);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Inventory updated successfully!')
+                    ->success()
+                    ->send();
+            });
+    }
+    
+    public function archiveProductAction(): FilamentAction
+    {
+        return FilamentAction::make('archiveProduct')
+            ->label('Archive Product')
+            ->icon('heroicon-o-archive-box')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Archive Product')
+            ->modalDescription('Are you sure you want to archive this product? It will be hidden from customers but remain in your records.')
+            ->modalSubmitActionLabel('Yes, Archive')
+            ->action(function () {
+                $this->product->update(['archived_at' => now()]);
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Product archived successfully!')
+                    ->success()
+                    ->send();
+                    
+                return redirect()->route('admin.products.index');
+            });
+    }
+}
+```
 
 ### E-commerce Admin Panel
 
@@ -602,6 +1208,7 @@ ActionCrumb is open-source software licensed under the [MIT license](LICENSE.md)
 - ✅ **Better Mobile UX** - Responsive dropdowns vs. cramped button rows  
 - ✅ **Consistent Navigation** - Unified breadcrumb + action pattern across your app
 - ✅ **Developer Experience** - Fluent API that feels like native Laravel
+- ✅ **Filament Integration** - Seamless WireAction support for modal forms and workflows
 
 **For Agencies & Freelancers:**
 - ✅ **Faster Client Delivery** - Pre-built interactive navigation components
