@@ -10,6 +10,48 @@
 
 > **The Solution**: ActionCrumb gives you beautiful, responsive breadcrumbs where each step can have contextual dropdown actions. Export users from the Users breadcrumb. Delete records from the Show page. Import data without leaving your current view.
 
+## 📖 Table of Contents
+
+- [Why ActionCrumb?](#why-actioncrumb-)
+- [Installation](#installation-)
+- [Tailwind CSS Configuration](#tailwind-css-configuration-)
+- [Quick Start](#quick-start-)
+- [Filament Actions Integration](#filament-actions-integration-)
+  - [WireAction - Execute Filament Actions](#wireaction---execute-filament-actions-from-breadcrumbs)
+  - [WireCrumb - Dedicated Components](#wirecrumb---dedicated-filament-action-components)
+  - [Bulk WireAction Creation](#bulk-wireaction-creation)
+  - [Advanced Features](#advanced-features)
+- [Configuration](#configuration-)
+  - [Theme Styles](#theme-styles-)
+  - [Available Colors](#available-colors-)
+  - [RTL Support](#rtl-support-)
+- [Advanced Usage](#advanced-usage-)
+  - [Dynamic Labels and URLs](#dynamic-labels-and-urls-with-closures)
+  - [Dynamic Actions Based on Permissions](#dynamic-actions-based-on-permissions)
+  - [Conditional Steps](#conditional-steps)
+  - [Complex Action Patterns](#complex-action-patterns)
+- [API Reference](#api-reference-)
+  - [Step Builder Methods](#step-builder-methods)
+  - [Action Builder Methods](#action-builder-methods)
+  - [WireAction Builder Methods](#wireaction-builder-methods-filament-integration)
+  - [WireCrumb Abstract Component](#wirecrumb-abstract-component)
+  - [Component Integration](#component-integration)
+- [Real-World Examples](#real-world-examples-)
+  - [Filament Admin Panel](#filament-admin-panel-with-modal-actions)
+  - [E-commerce Admin](#e-commerce-admin-panel)
+  - [CRM User Management](#crm-user-management)
+  - [Content Management](#content-management)
+- [Troubleshooting](#troubleshooting-)
+  - [Common Issues](#common-issues)
+  - [Performance Tips](#performance-tips)
+- [Customization](#customization-)
+  - [Publishing Views](#publishing-views)
+  - [Custom CSS](#custom-css)
+- [Contributing](#contributing-)
+- [Security](#security-)
+- [Credits](#credits-)
+- [License](#license-)
+
 ## Why ActionCrumb? 🚀
 
 **Transform This** ❌
