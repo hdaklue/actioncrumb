@@ -177,17 +177,21 @@ class UsersManagement extends Component implements HasActions, HasSchemas
                 ->current()
                 ->actions([
                     // Execute Filament Actions through WireAction
-                    WireAction::make('Create User')
+                    WireAction::make('create-user')
+                        ->label('Create User')
                         ->livewire($this)
                         ->icon('heroicon-o-plus')
                         ->execute('createUser'),
                         
-                    WireAction::make('Import Users')
+                    WireAction::make('import-users')
+                        ->label('Import Users')
                         ->livewire($this)
                         ->icon('heroicon-o-arrow-up-tray')
+                        ->visible(fn() => auth()->user()->can('import-users'))
                         ->execute('importUsers'),
                         
-                    WireAction::make('Export All')
+                    WireAction::make('export-all')
+                        ->label('Export All')
                         ->livewire($this)
                         ->icon('heroicon-o-arrow-down-tray')
                         ->execute('exportUsers'),
@@ -292,21 +296,24 @@ class UserProfileCrumb extends WireCrumb
             Step::make($this->user->name ?? 'User')
                 ->current()
                 ->actions([
-                    WireAction::make('Edit Profile')
+                    WireAction::make('edit-profile')
+                        ->label('Edit Profile')
                         ->livewire($this)
                         ->icon('heroicon-o-pencil')
                         ->execute('editProfile'),
                         
-                    WireAction::make('Change Password')
+                    WireAction::make('change-password')
+                        ->label('Change Password')
                         ->livewire($this)
                         ->icon('heroicon-o-key')
                         ->execute('changePassword'),
                         
-                    WireAction::make('Suspend User')
+                    WireAction::make('suspend-user')
+                        ->label('Suspend User')
                         ->livewire($this)
                         ->icon('heroicon-o-no-symbol')
-                        ->execute('suspendUser')
-                        ->validated(auth()->user()->can('suspend', $this->user)),
+                        ->visible(fn() => auth()->user()->can('suspend', $this->user))
+                        ->execute('suspendUser'),
                 ])
         ];
     }
@@ -394,20 +401,24 @@ protected function actioncrumbs(): array
 {
     $bulkActions = WireAction::bulk($this, [
         [
+            'id' => 'create-document',
             'label' => 'Create Document',
             'action' => 'createDocument',
             'icon' => 'heroicon-o-document-plus',
         ],
         [
+            'id' => 'import-documents',
             'label' => 'Import Documents',
             'action' => 'importDocuments',
             'icon' => 'heroicon-o-arrow-up-tray',
+            'visible' => fn() => auth()->user()->can('import-documents'),
         ],
         [
+            'id' => 'archive-all',
             'label' => 'Archive All',
             'action' => 'archiveAll',
             'icon' => 'heroicon-o-archive-box',
-            'validated' => auth()->user()->can('archive-documents'),
+            'visible' => fn() => auth()->user()->can('archive-documents'),
         ],
     ]);
     
@@ -421,9 +432,26 @@ protected function actioncrumbs(): array
 
 ### Advanced Features
 
+**Action Visibility:**
+```php
+WireAction::make('admin-action')
+    ->label('Admin Only Action')
+    ->livewire($this)
+    ->visible(fn() => auth()->user()->isAdmin())
+    ->execute('adminAction');
+
+// Or static boolean
+WireAction::make('delete-user')
+    ->label('Delete User')
+    ->livewire($this)
+    ->visible(false) // Hide this action
+    ->execute('deleteUser');
+```
+
 **Action Validation:**
 ```php
-WireAction::make('Delete User')
+WireAction::make('delete-user')
+    ->label('Delete User')
     ->livewire($this)
     ->validated(auth()->user()->can('delete', $this->user))
     ->execute('deleteUser');
@@ -431,7 +459,8 @@ WireAction::make('Delete User')
 
 **Action Parameters:**
 ```php
-WireAction::make('Send Email')
+WireAction::make('send-email')
+    ->label('Send Email')
     ->livewire($this)
     ->parameters(['template' => 'welcome'])
     ->execute('sendEmail');
@@ -658,9 +687,11 @@ Action::make('action-id')                       // Unique action ID (used as def
 ### WireAction Builder Methods (Filament Integration)
 
 ```php
-WireAction::make('Label')
+WireAction::make('action-id')                   // Unique action ID (required)
+    ->label('Display Label')                    // Override label (string or closure)
     ->livewire($this)                           // Set Livewire component with HasActions
-    ->icon('heroicon-o-star')                   // Heroicon for the action
+    ->icon('heroicon-o-star')                   // Heroicon for the action (optional)
+    ->visible(true)                             // Show/hide action (bool or closure, default: true)
     ->execute('actionName')                     // Execute Filament Action method
     ->parameters(['key' => 'value'])            // Pass parameters to action
     ->validated(true)                           // Enable/disable action validation (default: true)
@@ -753,22 +784,27 @@ class ProductManagement extends Component implements HasActions, HasSchemas
                 ->icon('heroicon-o-cube')
                 ->route('admin.products.index')
                 ->actions([
-                    WireAction::make('Create Product')
+                    WireAction::make('create-product')
+                        ->label('Create Product')
                         ->livewire($this)
                         ->icon('heroicon-o-plus')
                         ->execute('createProduct'),
                         
-                    WireAction::make('Bulk Import')
+                    WireAction::make('bulk-import')
+                        ->label('Bulk Import')
                         ->livewire($this)
                         ->icon('heroicon-o-arrow-up-tray')
+                        ->visible(fn() => auth()->user()->can('import-products'))
                         ->execute('bulkImport'),
                         
-                    WireAction::make('Export Catalog')
+                    WireAction::make('export-catalog')
+                        ->label('Export Catalog')
                         ->livewire($this)
                         ->icon('heroicon-o-arrow-down-tray')
                         ->execute('exportCatalog'),
                         
-                    WireAction::make('Manage Categories')
+                    WireAction::make('manage-categories')
+                        ->label('Manage Categories')
                         ->livewire($this)
                         ->icon('heroicon-o-tag')
                         ->execute('manageCategories'),
@@ -777,21 +813,24 @@ class ProductManagement extends Component implements HasActions, HasSchemas
             Step::make($this->product?->name ?? 'Product Details')
                 ->current()
                 ->actions([
-                    WireAction::make('Edit Details')
+                    WireAction::make('edit-details')
+                        ->label('Edit Details')
                         ->livewire($this)
                         ->icon('heroicon-o-pencil')
                         ->execute('editProduct'),
                         
-                    WireAction::make('Update Inventory')
+                    WireAction::make('update-inventory')
+                        ->label('Update Inventory')
                         ->livewire($this)
                         ->icon('heroicon-o-cube')
                         ->execute('updateInventory'),
                         
-                    WireAction::make('Archive Product')
+                    WireAction::make('archive-product')
+                        ->label('Archive Product')
                         ->livewire($this)
                         ->icon('heroicon-o-archive-box')
-                        ->execute('archiveProduct')
-                        ->validated($this->product && auth()->user()->can('archive', $this->product)),
+                        ->visible(fn() => $this->product && auth()->user()->can('archive', $this->product))
+                        ->execute('archiveProduct'),
                 ])
         ];
     }
