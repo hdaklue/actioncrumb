@@ -52,6 +52,20 @@ composer require hdaklue/actioncrumb
 
 The package automatically registers via Laravel's service provider discovery. No config file publishing needed!
 
+## Tailwind CSS Configuration 🎨
+
+Since ActionCrumb uses dynamic color classes, add these `@source` directives to your main CSS file (usually `resources/css/app.css`):
+
+```css
+/* Scan ActionCrumb package files for classes */
+@source "vendor/hdaklue/actioncrumb/src/Config/ActioncrumbConfig.php";
+@source "vendor/hdaklue/actioncrumb/resources/views/components/*.blade.php";
+@source "vendor/hdaklue/actioncrumb/resources/views/components/modals/*.blade.php";
+@source "vendor/hdaklue/actioncrumb/src/Enums/*.php";
+```
+
+This ensures all dynamic color classes are included in your CSS build.
+
 ## Quick Start ⚡
 
 **1. Add the Trait to Your Livewire Component**

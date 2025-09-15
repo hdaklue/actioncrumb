@@ -237,8 +237,8 @@ class ActioncrumbConfig
             'px-4 py-2', // Better padding for full-width items
             'text-sm',
             'text-' . $this->secondaryColor->value . '-700 dark:text-' . $this->secondaryColor->value . '-300',
-            'hover:bg-' . $this->primaryColor->value . '-50 hover:text-' . $this->primaryColor->value . '-700',
-            'dark:hover:bg-' . $this->primaryColor->value . '-900/10 dark:hover:text-' . $this->primaryColor->value . '-300',
+            'hover:bg-' . $this->secondaryColor->value . '-100 hover:text-' . $this->primaryColor->value . '-700',
+            'dark:hover:bg-' . $this->secondaryColor->value . '-800 dark:hover:text-' . $this->primaryColor->value . '-300',
             'transition-colors duration-150',
             'cursor-pointer',
             'border-0 rounded-none', // No borders or radius

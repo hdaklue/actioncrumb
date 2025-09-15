@@ -1,0 +1,43 @@
+/*
+ * ActionCrumb Tailwind CSS Safelist using @source inline
+ * 
+ * Add these @source directives to your main CSS file (usually app.css or main.css)
+ * to ensure Tailwind scans the ActionCrumb package files for classes.
+ * 
+ * This is the recommended approach as it automatically detects all classes
+ * used in the package without needing to maintain a manual safelist.
+ */
+
+/* Scan ActionCrumb PHP configuration file for dynamic classes */
+@source "vendor/hdaklue/actioncrumb/src/Config/ActioncrumbConfig.php";
+
+/* Scan ActionCrumb Blade component templates */
+@source "vendor/hdaklue/actioncrumb/resources/views/components/*.blade.php";
+@source "vendor/hdaklue/actioncrumb/resources/views/components/modals/*.blade.php";
+
+/* Scan ActionCrumb enum files that contain class definitions */
+@source "vendor/hdaklue/actioncrumb/src/Enums/*.php";
+
+/*
+ * Optional: If you're using custom ActionCrumb configurations in your app,
+ * also add your service provider or config files that use ActionCrumb:
+ * 
+ * @source "app/Providers/ActioncrumbServiceProvider.php";
+ * @source "config/actioncrumb.php";
+ */
+
+/*
+ * Manual safelist for classes that might not be detected by @source:
+ * Add these to your tailwind.config.js safelist if needed:
+ * 
+ * safelist: [
+ *   'actioncrumb-container',
+ *   'actioncrumb-step',
+ *   'actioncrumb-dropdown-portal',
+ *   'theme-simple',
+ *   'theme-rounded',
+ *   'theme-square',
+ *   'is-current',
+ *   'scrollbar-hide',
+ * ]
+ */
