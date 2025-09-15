@@ -233,7 +233,7 @@ class ActioncrumbConfig
         // Use Tailwind classes with proper color configuration
         $classes = [
             'flex items-center gap-3',
-            'w-full text-left',
+            'w-full text-start',
             'px-4 py-2', // Better padding for full-width items
             'text-sm',
             'text-' . $this->secondaryColor->value . '-700 dark:text-' . $this->secondaryColor->value . '-300',
@@ -242,6 +242,18 @@ class ActioncrumbConfig
             'transition-colors duration-150',
             'cursor-pointer',
             'border-0 rounded-none', // No borders or radius
+        ];
+        
+        return implode(' ', $classes);
+    }
+
+    public function getDropdownItemTextClasses(): string
+    {
+        // Classes to make text take full available width in dropdown items with RTL support
+        $classes = [
+            'flex-1', // Take remaining space after icon
+            'text-start', // Start alignment (supports RTL)
+            'truncate', // Handle long text gracefully
         ];
         
         return implode(' ', $classes);
@@ -286,7 +298,7 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-none',
         };
 
-        return "relative transform overflow-hidden {$borderRadius} bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0";
+        return "relative transform overflow-hidden {$borderRadius} bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-start shadow-xl transition-all w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0";
     }
 
     public function getMobileModalItemClasses(): string
@@ -313,7 +325,7 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-md',
         };
 
-        return "ml-3 p-2 text-{$this->secondaryColor->value}-400 hover:text-{$this->primaryColor->value}-600 dark:hover:text-{$this->primaryColor->value}-400 hover:bg-{$this->secondaryColor->value}-100 dark:hover:bg-{$this->secondaryColor->value}-800 {$borderRadius} transition-colors";
+        return "ms-3 p-2 text-{$this->secondaryColor->value}-400 hover:text-{$this->primaryColor->value}-600 dark:hover:text-{$this->primaryColor->value}-400 hover:bg-{$this->secondaryColor->value}-100 dark:hover:bg-{$this->secondaryColor->value}-800 {$borderRadius} transition-colors";
     }
 
     public function getMobileModalActionItemClasses(bool $isEnabled = true): string
@@ -324,7 +336,7 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-none',
         };
 
-        $baseClasses = "w-full flex items-center px-3 py-3 min-h-[2.5rem] text-left {$borderRadius} transition-colors";
+        $baseClasses = "w-full flex items-center px-3 py-3 min-h-[2.5rem] text-start {$borderRadius} transition-colors";
         
         if ($isEnabled) {
             $hoverClasses = "text-{$this->secondaryColor->value}-700 dark:text-{$this->secondaryColor->value}-200 hover:bg-{$this->primaryColor->value}-50 hover:text-{$this->primaryColor->value}-700 dark:hover:bg-{$this->primaryColor->value}-900/10 dark:hover:text-{$this->primaryColor->value}-300";
@@ -346,7 +358,7 @@ class ActioncrumbConfig
 
     public function getMobileModalIconClasses(): string
     {
-        return "w-5 h-5 mr-3 text-{$this->secondaryColor->value}-400 flex-shrink-0";
+        return "w-5 h-5 me-3 text-{$this->secondaryColor->value}-400 flex-shrink-0";
     }
 
     public function getMobileModalSeparatorClasses(): string
@@ -362,7 +374,7 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-md',
         };
 
-        return "ml-3 {$borderRadius} p-2 text-{$this->secondaryColor->value}-500 transition-colors hover:bg-{$this->secondaryColor->value}-100 hover:text-{$this->primaryColor->value}-700 dark:text-{$this->secondaryColor->value}-400 dark:hover:bg-{$this->secondaryColor->value}-700 dark:hover:text-{$this->primaryColor->value}-200";
+        return "ms-3 {$borderRadius} p-2 text-{$this->secondaryColor->value}-500 transition-colors hover:bg-{$this->secondaryColor->value}-100 hover:text-{$this->primaryColor->value}-700 dark:text-{$this->secondaryColor->value}-400 dark:hover:bg-{$this->secondaryColor->value}-700 dark:hover:text-{$this->primaryColor->value}-200";
     }
 
     public function getCurrentStepMobileLabelClasses(): string

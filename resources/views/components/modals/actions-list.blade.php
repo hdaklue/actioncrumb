@@ -55,12 +55,12 @@
                                         {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                         
                                         @if($action->getIcon())
-                                            <x-icon name="{{ $action->getIcon() }}" class="w-5 h-5 mr-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
+                                            <x-icon name="{{ $action->getIcon() }}" class="w-5 h-5 me-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
                                         @else
-                                            <x-icon name="heroicon-o-squares-2x2" class="w-5 h-5 mr-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
+                                            <x-icon name="heroicon-o-squares-2x2" class="w-5 h-5 me-3 text-{{ $config->getSecondaryColor()->value }}-400 flex-shrink-0" />
                                         @endif
                                         
-                                        <span class="font-medium flex-1 flex items-center">{{ $action->getLabel() }}</span>
+                                        <span class="font-medium flex-1 flex items-center text-start">{{ $action->getLabel() }}</span>
                                     </button>
                                 @endif
                             @endforeach

@@ -39,7 +39,7 @@
                 <div class="{{ $config->getMobileCurrentStepContainerClasses() }}">
                     @if ($lastVisibleStep->getIcon())
                         <x-icon name="{{ $lastVisibleStep->getIcon() }}"
-                            class="mr-2 h-4 w-4 flex-shrink-0 text-{{ $config->getSecondaryColor()->value }}-500" />
+                            class="me-2 h-4 w-4 flex-shrink-0 text-{{ $config->getSecondaryColor()->value }}-500" />
                     @endif
                     <span class="{{ $config->getCurrentStepMobileLabelClasses() }}">
                         {{ $lastVisibleStep->getLabel() }}
@@ -102,7 +102,7 @@
                                         wire:navigate>
                                         @if ($step->getIcon())
                                             <x-icon name="{{ $step->getIcon() }}"
-                                                class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
+                                                class="me-2 h-5 w-5 flex-shrink-0" />
                                         @endif
                                         {{ $step->getLabel() }}
                                     </a>
@@ -111,7 +111,7 @@
                                         class="{{ $config->getStepClasses($step->isClickable(), $step->isCurrent(), true) }}">
                                         @if ($step->getIcon())
                                             <x-icon name="{{ $step->getIcon() }}"
-                                                class="mr-2 h-5 w-5 flex-shrink-0 rtl:ml-2 rtl:mr-0" />
+                                                class="me-2 h-5 w-5 flex-shrink-0" />
                                         @endif
                                         {{ $step->getLabel() }}
                                     </span>
@@ -182,7 +182,7 @@
                                     }
                                 }" 
                                 @click.away="closeDropdown()" 
-                                class="relative ml-1 rtl:ml-0 rtl:mr-1">
+                                class="relative ms-1">
                                     {{-- Mobile: Use modal button --}}
                                     <button x-show="isMobile" x-cloak
                                         @click="currentStep = {{ $index }}; showActionsModal = true"
@@ -219,7 +219,7 @@
                                                         <x-icon name="{{ $action->getIcon() }}"
                                                             class="{{ $config->getActionIconClasses() }}" />
                                                     @endif
-                                                    <span>{{ $action->getLabel() }}</span>
+                                                    <span class="{{ $config->getDropdownItemTextClasses() }}">{{ $action->getLabel() }}</span>
                                                 </button>
                                             @endif
                                         @endforeach
