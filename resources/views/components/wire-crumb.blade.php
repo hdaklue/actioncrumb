@@ -1,3 +1,3 @@
 <div>
-    {!! $this->renderActioncrumbs() !!}
+    {!! $renderedActioncrumbs !!}
 </div>

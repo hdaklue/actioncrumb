@@ -25,6 +25,14 @@ trait HasActionCrumbs
         return $this->actioncrumbSteps;
     }
 
+    /**
+     * Clear cached actioncrumb steps to force refresh on next render
+     */
+    public function refreshActioncrumbs(): void
+    {
+        $this->actioncrumbSteps = [];
+    }
+
     public function renderActioncrumbs(): string
     {
         $steps = $this->getActioncrumbs();
