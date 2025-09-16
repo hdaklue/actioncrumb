@@ -89,16 +89,6 @@ abstract class WireCrumb extends Component implements HasActions, HasSchemas
         ]);
     }
 
-    /**
-     * Override to refresh actioncrumbs after action execution
-     */
-    public function updated($property = null)
-    {
-        parent::updated($property);
-        
-        // Refresh actioncrumbs after any property update to ensure state is updated
-        $this->refreshActioncrumbs();
-    }
 
     /**
      * Define the actioncrumbs for this component.
