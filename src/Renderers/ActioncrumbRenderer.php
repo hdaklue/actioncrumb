@@ -31,7 +31,7 @@ class ActioncrumbRenderer
         $processedSteps = [];
 
         foreach ($steps as $step) {
-            if ($step instanceof \Hdaklue\Actioncrumb\Components\StepComponent) {
+            if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep) {
                 // For StepComponent, we'll render the component itself
                 $processedSteps[] = $step;
             } elseif ($step instanceof \Hdaklue\Actioncrumb\Step) {
