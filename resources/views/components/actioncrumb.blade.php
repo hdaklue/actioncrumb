@@ -91,7 +91,24 @@
             role="navigation" aria-label="Breadcrumb">
             @foreach ($steps as $index => $step)
                 @if ($step->isVisible())
-                    <div class="flex flex-shrink-0 items-center">
+                    @if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep)
+                        {{-- Render WireStep as Livewire component --}}
+                        @livewire($step::class, [
+                            'stepId' => $step->getId(),
+                            'label' => $step->label,
+                            'icon' => $step->icon,
+                            'url' => $step->url,
+                            'route' => $step->route,
+                            'routeParams' => $step->routeParams,
+                            'current' => $step->current,
+                            'visible' => $step->visible,
+                            'enabled' => $step->enabled,
+                            'parent' => $step->parent,
+                            'stepData' => $step->stepData
+                        ], key($step->getId() . '-' . $index))
+                    @else
+                        {{-- Regular Step rendering --}}
+                        <div class="flex flex-shrink-0 items-center">
                         @if ($step->hasActions() && $config->isDropdownsEnabled())
                             {{-- Step with dropdown actions - separate link and dropdown --}}
                             <div class="flex flex-shrink-0 items-center {{ $config->getStepContainerClasses($step->isCurrent()) }}">
@@ -251,7 +268,8 @@
                                 </span>
                             </div>
                         @endif
-                    </div>
+                        </div>
+                    @endif
 
                     @if (!$loop->last)
                         {{-- Configurable Separator --}}

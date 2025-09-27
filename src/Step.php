@@ -2,6 +2,8 @@
 
 namespace Hdaklue\Actioncrumb;
 
+use Filament\Actions\Contracts\HasActions;
+
 class Step
 {
     protected string $id;
@@ -166,5 +168,33 @@ class Step
         }
 
         return $this->getUrl();
+    }
+
+    /**
+     * Convert this Step to a WireStep for advanced functionality
+     */
+    public function asComponent(?HasActions $parent = null): \Hdaklue\Actioncrumb\Components\WireStep
+    {
+        $component = new \Hdaklue\Actioncrumb\Components\WireStep();
+        $component->stepId = $this->id;
+        $component->label = $this->label;
+        $component->icon = $this->icon;
+        $component->url = $this->url;
+        $component->route = $this->route;
+        $component->routeParams = $this->routeParams;
+        $component->current = $this->current;
+        $component->visible = $this->visible;
+        $component->enabled = $this->enabled;
+        $component->parent = $parent;
+
+        return $component;
+    }
+
+    /**
+     * Check if this step should be rendered as a component
+     */
+    public function isComponent(): bool
+    {
+        return false;
     }
 }

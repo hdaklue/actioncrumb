@@ -54,7 +54,7 @@ trait HasActionCrumbs
                 $currentActionId = md5($step->getLabel() . $action->getLabel() . $index);
 
                 if ($currentActionId === $actionId) {
-                    // Check if action is enabled before executing
+                    // Check if the action is enabled before executing
                     if (!$action->isEnabled()) {
                         return null;
                     }

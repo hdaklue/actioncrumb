@@ -93,8 +93,66 @@ abstract class WireCrumb extends Component implements HasActions, HasSchemas
     /**
      * Define the actioncrumbs for this component.
      * Must be implemented by child classes.
-     * 
-     * @return array Array of Step instances with optional Action instances
+     *
+     * @return array Array of Step or WireStep instances with optional Action instances
      */
     abstract protected function actioncrumbs(): array;
+
+    /**
+     * Override getActioncrumbs to process WireSteps
+     *
+     * @return array Array of Step or WireStep instances
+     */
+    public function getActioncrumbs(): array
+    {
+        if (empty($this->actioncrumbSteps)) {
+            $steps = $this->actioncrumbs();
+            $this->actioncrumbSteps = $this->processSteps($steps);
+        }
+
+        return $this->actioncrumbSteps;
+    }
+
+    /**
+     * Process steps to handle WireStep instances
+     */
+    protected function processSteps(array $steps): array
+    {
+        $processedSteps = [];
+
+        foreach ($steps as $step) {
+            if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep) {
+                // Ensure WireStep has parent reference
+                if (!$step->parent) {
+                    $step->parent($this);
+                }
+                $processedSteps[] = $step;
+            } elseif ($step instanceof \Hdaklue\Actioncrumb\Step) {
+                $processedSteps[] = $step;
+            } else {
+                // Invalid step type - log warning and skip
+                if (function_exists('logger')) {
+                    logger()->warning('Invalid step type in actioncrumbs', [
+                        'type' => get_class($step),
+                        'component' => get_class($this)
+                    ]);
+                }
+            }
+        }
+
+        return $processedSteps;
+    }
+
+    /**
+     * Check if any steps are WireSteps
+     */
+    public function hasWireSteps(): bool
+    {
+        foreach ($this->getActioncrumbs() as $step) {
+            if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
