@@ -396,4 +396,22 @@ class ActioncrumbConfig
     {
         return "h-4 w-4 text-{$this->secondaryColor->value}-400";
     }
+
+    /**
+     * Classes for the separator wrapper between steps
+     */
+    public function getSeparatorClasses(): string
+    {
+        $margin = $this->compact ? 'mx-1' : 'mx-2';
+        return trim("flex items-center {$margin}");
+    }
+
+    /**
+     * HTML for the separator icon/element between steps
+     */
+    public function getSeparatorIcon(): string
+    {
+        // Delegate to the enum's SVG generator
+        return $this->separatorType->getSvg();
+    }
 }
