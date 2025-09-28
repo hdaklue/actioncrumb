@@ -26,6 +26,13 @@ class WireStep
     protected bool $visible = true;
     protected bool $enabled = true;
 
+    /**
+     * Optional actions associated with this step (for menus/modals)
+     * Matches the API surface of Hdaklue\Actioncrumb\Step where needed
+     * @var array<int, \Hdaklue\Actioncrumb\Action>
+     */
+    protected array $actions = [];
+
     protected function __construct(string $componentClass, array $parameters = [])
     {
         $this->componentClass = $componentClass;
@@ -109,6 +116,15 @@ class WireStep
     }
 
     /**
+     * Set the actions associated with this step
+     */
+    public function actions(array $actions): self
+    {
+        $this->actions = $actions;
+        return $this;
+    }
+
+    /**
      * Set custom step ID
      */
     public function stepId(string $stepId): self
@@ -182,6 +198,14 @@ class WireStep
     }
 
     /**
+     * Get actions for this step
+     */
+    public function getActions(): array
+    {
+        return $this->actions;
+    }
+
+    /**
      * Get resolved URL (route or direct URL)
      */
     public function getResolvedUrl(): ?string
@@ -215,6 +239,14 @@ class WireStep
     public function isEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    /**
+     * Whether this step has actions
+     */
+    public function hasActions(): bool
+    {
+        return count($this->actions) > 0;
     }
 
     /**
@@ -260,6 +292,9 @@ class WireStep
         $step->current($this->current);
         $step->visible($this->visible);
         $step->enabled($this->enabled);
+        if (!empty($this->actions)) {
+            $step->actions($this->actions);
+        }
 
         return $step;
     }
