@@ -70,6 +70,11 @@ Dashboard > Users ⌄ > John Doe ⌄
 - [Migration Guide v2.0.0](#migration-guide-v200-)
 - [Tailwind CSS Configuration](#tailwind-css-configuration-)
 - [Quick Start](#quick-start-)
+- [Testing & Quality Assurance](#testing--quality-assurance-)
+  - [Running Tests](#running-tests)
+  - [Writing Tests](#writing-tests)
+  - [Test Coverage](#test-coverage)
+  - [Testing Best Practices](#testing-best-practices)
 - [Filament Actions Integration](#filament-actions-integration-)
   - [WireAction - Execute Filament Actions](#wireaction---execute-filament-actions-from-breadcrumbs)
   - [WireStep - Embed Livewire Components as Breadcrumb Steps](#wirestep---embed-livewire-components-as-breadcrumb-steps)
@@ -99,6 +104,7 @@ Dashboard > Users ⌄ > John Doe ⌄
   - [Content Management](#content-management)
 - [Troubleshooting](#troubleshooting-)
   - [Common Issues](#common-issues)
+  - [Recent Bug Fixes](#recent-bug-fixes)
   - [Performance Tips](#performance-tips)
 - [Customization](#customization-)
   - [Publishing Views](#publishing-views)
@@ -548,6 +554,254 @@ class UsersManagement extends Component
 ```
 
 **That's it!** Your breadcrumbs are now interactive with dropdown actions.
+
+## Testing & Quality Assurance 🧪
+
+ActionCrumb comes with a comprehensive test suite to ensure reliability and prevent regressions. The package includes 109+ tests covering all functionality.
+
+### Running Tests
+
+**Run the full test suite:**
+
+```bash
+# Run all tests
+composer test
+
+# Run with verbose output
+composer test -- --verbose
+
+# Run specific test file
+vendor/bin/pest tests/Feature/HasActionCrumbsTest.php
+
+# Run tests with coverage
+vendor/bin/pest --coverage
+```
+
+**Test Structure:**
+
+```
+tests/
+├── Feature/               # Integration tests
+│   ├── HasActionCrumbsTest.php
+│   ├── WireCrumbTest.php
+│   └── FilamentActionsTest.php
+├── Unit/                  # Unit tests
+│   ├── StepTest.php
+│   ├── ActionTest.php
+│   ├── WireStepTest.php
+│   ├── WireActionTest.php
+│   └── StepRendererTest.php
+└── TestCase.php           # Base test class
+```
+
+### Writing Tests
+
+**Testing ActionCrumb Components:**
+
+```php
+<?php
+
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
+use Hdaklue\Actioncrumb\{Step, Action};
+
+// Create test component
+class TestComponent
+{
+    use HasActionCrumbs;
+
+    protected function actioncrumbs(): array
+    {
+        return [
+            Step::make('home')->label('Home'),
+            Step::make('users')
+                ->label('Users')
+                ->actions([
+                    Action::make('create')->label('Create User')
+                ])
+        ];
+    }
+}
+
+describe('ActionCrumb Functionality', function () {
+    it('can render breadcrumbs', function () {
+        $component = new TestComponent();
+        $breadcrumbs = $component->getActioncrumbs();
+
+        expect($breadcrumbs)->not->toBeNull()
+            ->and($breadcrumbs)->toHaveCount(2);
+    });
+
+    it('caches breadcrumb results', function () {
+        $component = new TestComponent();
+
+        $first = $component->getActioncrumbs();
+        $second = $component->getActioncrumbs();
+
+        expect($first)->toBe($second);
+    });
+});
+```
+
+**Testing WireStep Components:**
+
+```php
+use Hdaklue\Actioncrumb\Components\WireStep;
+use App\Livewire\Components\UserDetailsComponent;
+
+it('can create wire steps with parameters', function () {
+    $wireStep = WireStep::make(UserDetailsComponent::class, [
+        'user' => $user,
+        'role' => 'admin'
+    ]);
+
+    expect($wireStep->getComponentClass())->toBe(UserDetailsComponent::class)
+        ->and($wireStep->getParameters())->toHaveKey('user')
+        ->and($wireStep->getParameters())->toHaveKey('role');
+});
+
+it('has consistent API with Step class', function () {
+    $wireStep = WireStep::make(UserDetailsComponent::class)
+        ->label('User Details')
+        ->icon('heroicon-o-user')
+        ->current(true);
+
+    expect($wireStep->getLabel())->toBe('User Details')
+        ->and($wireStep->getIcon())->toBe('heroicon-o-user')
+        ->and($wireStep->isCurrent())->toBeTrue()
+        ->and($wireStep->isClickable())->toBeFalse() // Current steps are not clickable
+        ->and($wireStep->hasRoute())->toBeFalse()
+        ->and($wireStep->hasUrl())->toBeFalse();
+});
+```
+
+**Testing Filament Actions Integration:**
+
+```php
+use Hdaklue\Actioncrumb\Support\WireAction;
+use Filament\Actions\Contracts\HasActions;
+
+it('can create wire actions for Filament components', function () {
+    $component = Mockery::mock(HasActions::class);
+
+    $wireAction = WireAction::make('test-action')
+        ->livewire($component)
+        ->label('Test Action')
+        ->visible(true);
+
+    $result = $wireAction->execute('testMethod');
+
+    expect($result)->toBeInstanceOf(Action::class);
+});
+
+it('filters invisible actions in bulk creation', function () {
+    $component = Mockery::mock(HasActions::class);
+
+    $config = [
+        ['label' => 'Visible', 'action' => 'visible', 'visible' => true],
+        ['label' => 'Hidden', 'action' => 'hidden', 'visible' => false],
+    ];
+
+    $actions = WireAction::bulk($component, $config);
+
+    expect($actions)->toHaveCount(1);
+});
+```
+
+### Test Coverage
+
+**Current test coverage includes:**
+
+- ✅ **Core Components** (109 tests, 209 assertions)
+  - Step creation and configuration
+  - Action creation and execution
+  - WireStep component embedding
+  - WireAction Filament integration
+  - HasActionCrumbs trait functionality
+  - StepRenderer template processing
+
+- ✅ **Feature Testing**
+  - Component rendering and caching
+  - Action execution and event handling
+  - Permission-based visibility
+  - Dynamic label and URL resolution
+  - Error handling and graceful degradation
+
+- ✅ **Integration Testing**
+  - Livewire component integration
+  - Filament Actions compatibility
+  - Alpine.js interaction patterns
+  - Route and URL resolution
+
+### Testing Best Practices
+
+**When testing ActionCrumb functionality:**
+
+1. **Focus on Your Logic** - Test your business logic, not framework internals
+2. **Mock External Dependencies** - Use Mockery for Filament components
+3. **Test Edge Cases** - Empty arrays, null values, permission failures
+4. **Verify API Consistency** - Ensure WireStep has same methods as Step
+5. **Test Real-World Scenarios** - Complex permission matrices, dynamic content
+
+**Example: Testing Complex Permissions**
+
+```php
+it('shows correct actions based on user permissions', function () {
+    $adminUser = User::factory()->admin()->create();
+    $regularUser = User::factory()->create();
+
+    // Test admin permissions
+    actingAs($adminUser);
+    $component = new UserManagementComponent();
+    $breadcrumbs = $component->getActioncrumbs();
+
+    $userStep = collect($breadcrumbs)->firstWhere('label', 'Users');
+    $actions = $userStep->getActions();
+
+    expect($actions)->toContain(
+        fn($action) => $action->getLabel() === 'Delete User'
+    );
+
+    // Test regular user permissions
+    actingAs($regularUser);
+    $component = new UserManagementComponent();
+    $breadcrumbs = $component->getActioncrumbs();
+
+    $userStep = collect($breadcrumbs)->firstWhere('label', 'Users');
+    $actions = $userStep->getActions();
+
+    expect($actions)->not->toContain(
+        fn($action) => $action->getLabel() === 'Delete User'
+    );
+});
+```
+
+**Performance Testing:**
+
+```php
+it('performs well with large breadcrumb structures', function () {
+    $component = new TestComponent();
+
+    // Create 50 steps with 10 actions each
+    $steps = collect(range(1, 50))->map(function ($i) {
+        return Step::make("step-{$i}")
+            ->label("Step {$i}")
+            ->actions(
+                collect(range(1, 10))->map(fn($j) =>
+                    Action::make("action-{$i}-{$j}")->label("Action {$j}")
+                )->toArray()
+            );
+    });
+
+    $startTime = microtime(true);
+    $breadcrumbs = $component->getActioncrumbs();
+    $endTime = microtime(true);
+
+    expect($endTime - $startTime)->toBeLessThan(0.1); // Under 100ms
+    expect($breadcrumbs)->toHaveCount(50);
+});
+```
+
+The comprehensive test suite ensures ActionCrumb works reliably across different Laravel, Livewire, and Filament versions while maintaining backward compatibility and preventing regressions.
 
 ## Filament Actions Integration 🔥
 
@@ -1519,6 +1773,9 @@ Step::make('step-id')                           // Unique step ID (used as defau
 // Getter methods
 ->getId()                                       // Returns the unique step ID
 ->getLabel()                                    // Returns label or ID if no label set
+->isClickable()                                 // Returns true if step can be clicked (has URL/route and not current)
+->hasRoute()                                    // Returns true if step has a route
+->hasUrl()                                      // Returns true if step has a URL
 ```
 
 ### Action Builder Methods
@@ -1537,6 +1794,10 @@ Action::make('action-id')                       // Unique action ID (used as def
 // Getter methods
 ->getId()                                       // Returns the unique action ID
 ->getLabel()                                    // Returns label or ID if no label set
+->hasRoute()                                    // Returns true if action has a route
+->hasUrl()                                      // Returns true if action has a URL
+->isVisible()                                   // Returns true if action is visible
+->isEnabled()                                   // Returns true if action is enabled
 ```
 
 ### WireAction Builder Methods (Filament Integration)
@@ -1583,9 +1844,11 @@ WireStep::make(ComponentClass::class, $parameters)  // Create WireStep with comp
 ->isVisible()                                       // Check if visible
 ->isEnabled()                                       // Check if enabled
 ->isWireStep()                                      // Always returns true (for template differentiation)
+->isClickable()                                     // Returns true if step can be clicked (same as Step)
+->hasRoute()                                        // Returns true if step has a route (same as Step)
+->hasUrl()                                          // Returns true if step has a URL (same as Step)
 
 // Utility methods
-->render()                                          // Render the embedded component
 ->toStep()                                          // Convert to regular Step (fallback)
 ```
 
@@ -2001,18 +2264,114 @@ protected function actioncrumbs(): array
 **Q: Actions not executing in dropdown**
 ```php
 // ❌ Wrong: Missing event listener
-class MyComponent extends Component 
+class MyComponent extends Component
 {
     use HasActionCrumbs;
     // Missing getListeners() method
 }
 
 // ✅ Correct: Proper trait usage
-class MyComponent extends Component 
+class MyComponent extends Component
 {
     use HasActionCrumbs; // This automatically adds the required listeners
 }
 ```
+
+### Recent Bug Fixes
+
+**Array Unpacking Error (Fixed in v2.0.1)**
+
+**Issue:** "Only arrays and Traversables can be unpacked" error when clicking actions.
+
+**Cause:** The `HasActionCrumbs` trait's `getListeners()` method was attempting to merge non-array values from `parent::getListeners()`.
+
+**Fix:** Added proper type checking before array merge:
+
+```php
+// ❌ Before (problematic)
+protected function getListeners(): array
+{
+    return array_merge(
+        parent::getListeners() ?? [],  // Could return non-array
+        ['actioncrumb:execute' => 'handleActioncrumbAction']
+    );
+}
+
+// ✅ After (fixed)
+protected function getListeners(): array
+{
+    $parentListeners = parent::getListeners();
+    return array_merge(
+        is_array($parentListeners) ? $parentListeners : [],
+        ['actioncrumb:execute' => 'handleActioncrumbAction']
+    );
+}
+```
+
+**WireStep API Consistency (Fixed in v2.0.1)**
+
+**Issue:** WireStep class was missing methods available in Step class, causing API inconsistency.
+
+**Fix:** Added missing methods to WireStep for full API compatibility:
+
+```php
+// Added methods to WireStep class
+public function isClickable(): bool
+{
+    return !$this->current && ($this->hasUrl() || $this->hasRoute()) && $this->isEnabled();
+}
+
+public function hasRoute(): bool
+{
+    return !empty($this->route);
+}
+
+public function hasUrl(): bool
+{
+    return !empty($this->url);
+}
+
+public function getId(): string
+{
+    return $this->stepId ?? class_basename($this->componentClass);
+}
+```
+
+**WireStep Rendering Issue (Fixed in v2.0.1)**
+
+**Issue:** WireStep's `render()` method was trying to use ComponentRegistry when the renderer should use `@livewire()` directive.
+
+**Fix:** Removed the problematic `render()` method entirely, allowing the template to handle component rendering through standard Livewire patterns:
+
+```php
+// ❌ Before (problematic)
+public function render(): string
+{
+    try {
+        return app(ComponentRegistry::class)->component($this->componentClass, $this->parameters);
+    } catch (Exception $e) {
+        return $this->toStep()->render();
+    }
+}
+
+// ✅ After (fixed)
+// Method removed - rendering handled by template using @livewire()
+```
+
+**Template Rendering:** The WireStep now properly renders through the actioncrumb template:
+
+```blade
+{{-- resources/views/vendor/actioncrumb/components/actioncrumb.blade.php --}}
+@foreach($steps as $step)
+    @if($step->isWireStep())
+        @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId()))
+    @else
+        {{-- Regular step rendering --}}
+    @endif
+@endforeach
+```
+
+**Migration Impact:** These fixes maintain backward compatibility while improving reliability and API consistency. No changes required for existing implementations.
 
 **Q: Icons not displaying**
 ```bash

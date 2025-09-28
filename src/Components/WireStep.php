@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Hdaklue\Actioncrumb\Components;
 
 use Hdaklue\Actioncrumb\Step;
-use Livewire\Mechanisms\ComponentRegistry;
 
 /**
  * WireStep - Transporter for embedding Livewire components as breadcrumb steps
@@ -288,17 +287,6 @@ class WireStep
     public function isWireStep(): bool
     {
         return true;
-    }
-
-    /**
-     * Render the embedded Livewire component
-     */
-    public function render(): string
-    {
-        $componentRegistry = app(ComponentRegistry::class);
-        $componentName = $componentRegistry->getName($this->componentClass);
-
-        return app('livewire')->mount($componentName, $this->parameters)->html();
     }
 
     /**
