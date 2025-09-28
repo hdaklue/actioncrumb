@@ -158,6 +158,14 @@ class WireStep
     }
 
     /**
+     * Get step ID (alias for compatibility with Step class)
+     */
+    public function getId(): string
+    {
+        return $this->stepId;
+    }
+
+    /**
      * Get step label
      */
     public function getLabel(): ?string
@@ -225,6 +233,7 @@ class WireStep
         return $this->current;
     }
 
+
     /**
      * Check if visible
      */
@@ -239,6 +248,30 @@ class WireStep
     public function isEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    /**
+     * Check if step has a route
+     */
+    public function hasRoute(): bool
+    {
+        return !is_null($this->route);
+    }
+
+    /**
+     * Check if step has a URL
+     */
+    public function hasUrl(): bool
+    {
+        return !is_null($this->url);
+    }
+
+    /**
+     * Check if this step is clickable (same logic as Step class)
+     */
+    public function isClickable(): bool
+    {
+        return !$this->current && ($this->hasUrl() || $this->hasRoute()) && $this->isEnabled();
     }
 
     /**
