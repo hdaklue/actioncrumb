@@ -540,15 +540,63 @@ class UsersManagement extends Component
 
 **2. Render in Your Blade Template**
 
+ActionCrumb provides **two rendering approaches** for maximum flexibility:
 
+**Option A: Trait Method (Recommended)**
 ```blade
 <div>
-    <!-- Render your actioncrumbs -->
+    <!-- Render your actioncrumbs using the trait method -->
     {!! $this->renderActioncrumbs() !!}
-    
+
     <!-- Your component content -->
     <div class="mt-6">
         {{-- Your users table, etc --}}
+    </div>
+</div>
+```
+
+**Option B: Direct Blade Component**
+```blade
+<div>
+    <!-- Render using the Blade component directly -->
+    <x-actioncrumb :steps="$this->getActioncrumbs()" :component="$this" />
+
+    <!-- Your component content -->
+    <div class="mt-6">
+        {{-- Your users table, etc --}}
+    </div>
+</div>
+```
+
+**Option C: Manual Steps (Without Trait)**
+```blade
+@php
+use Hdaklue\Actioncrumb\{Step, Action};
+
+$steps = [
+    Step::make('dashboard')
+        ->label('Dashboard')
+        ->icon('heroicon-o-home')
+        ->url('/dashboard'),
+
+    Step::make('users')
+        ->label('Users')
+        ->icon('heroicon-o-users')
+        ->current()
+        ->actions([
+            Action::make('export')->label('Export Users')->icon('heroicon-o-arrow-down-tray'),
+            Action::make('import')->label('Import Users')->icon('heroicon-o-arrow-up-tray'),
+        ])
+];
+@endphp
+
+<div>
+    <!-- Render with manual steps -->
+    <x-actioncrumb :steps="$steps" />
+
+    <!-- Your component content -->
+    <div class="mt-6">
+        {{-- Your content here --}}
     </div>
 </div>
 ```
@@ -1917,6 +1965,85 @@ public function handleComponentUpdate($data)
 }
 ```
 
+### Blade Component Usage
+
+**Direct Blade Component (Alternative Approach)**
+
+ActionCrumb provides a Blade component for direct usage without traits:
+
+```blade
+{{-- Option 1: With Livewire component context --}}
+<x-actioncrumb :steps="$this->getActioncrumbs()" :component="$this" />
+
+{{-- Option 2: With manual steps array --}}
+<x-actioncrumb :steps="$steps" />
+
+{{-- Option 3: Inline step definition --}}
+<x-actioncrumb :steps="[
+    Step::make('dashboard')->label('Dashboard')->url('/dashboard'),
+    Step::make('users')->label('Users')->current()->actions([
+        Action::make('export')->label('Export Users'),
+        Action::make('import')->label('Import Users'),
+    ])
+]" />
+```
+
+**Component Parameters:**
+
+```php
+<x-actioncrumb
+    :steps="array"      // Required: Array of Step/WireStep instances
+    :component="object" // Optional: Livewire component for action handling
+/>
+```
+
+**Benefits of Blade Component Approach:**
+
+- **No trait dependency** - Use anywhere in your Blade templates
+- **Flexible step sources** - Pass steps from any source (models, services, etc.)
+- **Reusable** - Same component can be used across different views
+- **Laravel standard** - Uses familiar Blade component syntax
+
+**Example Integration in Any Blade Template:**
+
+```blade
+{{-- resources/views/admin/users/index.blade.php --}}
+@extends('layouts.app')
+
+@section('content')
+    @php
+    use Hdaklue\Actioncrumb\{Step, Action};
+
+    $breadcrumbs = [
+        Step::make('dashboard')->label('Admin Dashboard')->url('/admin'),
+        Step::make('users')->label('User Management')->current()->actions([
+            Action::make('create')->label('Add User')->route('users.create'),
+            Action::make('export')->label('Export All')->execute(fn() => 'export-logic'),
+            Action::make('import')->label('Import CSV')->route('users.import'),
+        ])
+    ];
+    @endphp
+
+    <div class="container mx-auto px-4">
+        {{-- Breadcrumbs without Livewire component --}}
+        <x-actioncrumb :steps="$breadcrumbs" />
+
+        {{-- Page content --}}
+        <div class="mt-8">
+            <h1 class="text-2xl font-bold">User Management</h1>
+            {{-- Your content here --}}
+        </div>
+    </div>
+@endsection
+```
+
+**When to Use Each Approach:**
+
+| Approach | Best For | Benefits |
+|----------|----------|----------|
+| **Trait Method** | Livewire components with dynamic breadcrumbs | Caching, component integration, event handling |
+| **Blade Component** | Static templates, shared layouts, non-Livewire views | Flexibility, reusability, no trait dependency |
+
 ## Real-World Examples 🌟
 
 ### Filament Admin Panel with Modal Actions
@@ -2274,6 +2401,24 @@ class MyComponent extends Component
 ```
 
 ### Recent Bug Fixes
+
+**Blade Component Support (Added in v2.0.2)**
+
+**Issue:** `InvalidArgumentException` - "Unable to locate a class or view for component [actioncrumb]" when using `<x-actioncrumb>`.
+
+**Cause:** Package only provided trait-based rendering, no direct Blade component support.
+
+**Fix:** Added `ActioncrumbComponent` class and registered it in service provider:
+
+```php
+// Now supported - Direct Blade component usage
+<x-actioncrumb :steps="$steps" :component="$this" />
+
+// Still supported - Original trait method
+{!! $this->renderActioncrumbs() !!}
+```
+
+**Benefits:** Multiple usage patterns, better Laravel integration, more flexible implementation options.
 
 **Array Unpacking Error (Fixed in v2.0.1)**
 
