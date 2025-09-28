@@ -67,6 +67,7 @@ Dashboard > Users ⌄ > John Doe ⌄
 
 - [Why ActionCrumb?](#why-actioncrumb-)
 - [Installation](#installation-)
+- [Migration Guide v2.0.0](#migration-guide-v200-)
 - [Tailwind CSS Configuration](#tailwind-css-configuration-)
 - [Quick Start](#quick-start-)
 - [Filament Actions Integration](#filament-actions-integration-)
@@ -191,6 +192,278 @@ composer require hdaklue/actioncrumb
 ❌ **Other packages:** Multiple config files, service provider registration, asset publishing, complex setup guides
 
 ✅ **ActionCrumb:** One command, zero configuration, immediate use
+
+## Migration Guide v2.0.0 🚀
+
+**ActionCrumb v2.0.0 introduces a revolutionary approach to WireStep components that provides maximum flexibility and reusability. However, this requires updating existing WireStep implementations.**
+
+### 🚨 Breaking Changes
+
+**v2.0.0 contains breaking changes for WireStep only. Regular Step and Action usage remains unchanged.**
+
+#### What Changed
+
+1. **WireStep Architecture**: Changed from base class inheritance to component embedding
+2. **Component Structure**: WireStep is now a transporter, not a base class
+3. **Parameter Passing**: Simplified to standard Livewire mount parameters
+4. **Method Names**: Updated lifecycle and trait methods
+
+#### Who Is Affected
+
+- ✅ **Not Affected**: Regular `Step` and `Action` usage (no changes needed)
+- ✅ **Not Affected**: `WireAction` usage (no changes needed)
+- ✅ **Not Affected**: Basic `HasActionCrumbs` trait usage (no changes needed)
+- 🚨 **Requires Migration**: Custom components that `extend WireStep`
+- 🚨 **Requires Migration**: Usage of `stepData()`, `refreshStep()`, etc.
+
+### Migration Steps
+
+#### Step 1: Update Your WireStep Components
+
+**❌ Old v1.x Implementation:**
+
+```php
+<?php
+
+namespace App\Livewire\Steps;
+
+use Hdaklue\Actioncrumb\Components\WireStep;
+use Hdaklue\Actioncrumb\Support\WireAction;
+
+class UserDetailsStep extends WireStep  // ❌ Extending WireStep
+{
+    public ?User $user = null;
+    public string $userRole = 'viewer';
+
+    public function mount(
+        string $stepId,
+        string|\Closure|null $label = null,
+        // ... complex mount signature ❌
+        array $stepData = []
+    ): void {
+        parent::mount($stepId, $label, $icon, $url, $route, $routeParams, $current, $visible, $enabled, $parent, $stepData);
+
+        $this->user = $stepData['user'] ?? null;  // ❌ stepData usage
+        $this->userRole = $stepData['userRole'] ?? 'viewer';
+    }
+
+    protected function actioncrumbs(): array  // ❌ actioncrumbs method
+    {
+        return [
+            WireAction::make('edit-user')
+                ->label('Edit User')
+                ->livewire($this)
+                ->execute('editUser'),
+        ];
+    }
+
+    public function editUserAction(): FilamentAction
+    {
+        return FilamentAction::make('editUser')
+            ->action(function (array $data) {
+                $this->user->update($data);
+                $this->refreshStep();  // ❌ refreshStep method
+            });
+    }
+}
+```
+
+**✅ New v2.0 Implementation:**
+
+```php
+<?php
+
+namespace App\Livewire\Components;
+
+use Livewire\Component;  // ✅ Regular Livewire component
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;  // ✅ New trait
+use Hdaklue\Actioncrumb\{Step, Action};
+
+class UserDetailsComponent extends Component implements HasActions, HasForms  // ✅ Standard interfaces
+{
+    use HasCrumbSteps;  // ✅ New trait for embedded components
+    use InteractsWithActions;
+    use InteractsWithForms;
+
+    public ?User $user = null;
+    public string $userRole = 'viewer';
+
+    public function mount(?User $user = null, string $userRole = 'viewer'): void  // ✅ Simple mount
+    {
+        $this->user = $user;
+        $this->userRole = $userRole;
+    }
+
+    protected function crumbSteps(): array  // ✅ New method name
+    {
+        return [
+            Step::make('user-details')
+                ->label($this->user->name ?? 'User Details')
+                ->icon('heroicon-o-user')
+                ->current(true)
+                ->actions([
+                    Action::make('edit-user')  // ✅ Regular Action, not WireAction
+                        ->label('Edit User')
+                        ->icon('heroicon-o-pencil')
+                        ->execute(fn() => $this->mountAction('editUser')),  // ✅ Standard Filament action
+                ])
+        ];
+    }
+
+    public function editUserAction(): FilamentAction
+    {
+        return FilamentAction::make('editUser')
+            ->action(function (array $data) {
+                $this->user->update($data);
+                $this->refreshCrumbSteps();  // ✅ New refresh method
+            });
+    }
+
+    public function render()  // ✅ Standard render method
+    {
+        return view('livewire.user-details-component', [
+            'user' => $this->user,
+            'userRole' => $this->userRole,
+        ]);
+    }
+}
+```
+
+#### Step 2: Create Component Blade View
+
+**Create the view file:**
+
+```blade
+{{-- resources/views/livewire/user-details-component.blade.php --}}
+<div>
+    <!-- ✅ Render the component's breadcrumb steps -->
+    {!! $this->renderCrumbSteps() !!}
+
+    <!-- Your component content -->
+    <div class="mt-6">
+        <h2 class="text-xl font-semibold">{{ $user->name }}</h2>
+        <p class="text-gray-600">Role: {{ $userRole }}</p>
+        <!-- Additional component content -->
+    </div>
+
+    <!-- ✅ Include Filament modals -->
+    <x-filament-actions::modals />
+</div>
+```
+
+#### Step 3: Update WireStep Usage
+
+**❌ Old v1.x Usage:**
+
+```php
+protected function actioncrumbs(): array
+{
+    return [
+        Step::make('Dashboard')->url('/dashboard'),
+        Step::make('Users')->route('users.index'),
+
+        // ❌ Old WireStep usage
+        UserDetailsStep::make('user-details')
+            ->label($this->user->name)
+            ->stepData([
+                'user' => $this->user,
+                'userRole' => $this->user->role,
+            ])
+            ->parent($this),
+    ];
+}
+```
+
+**✅ New v2.0 Usage:**
+
+```php
+use Hdaklue\Actioncrumb\Components\WireStep;  // ✅ Import WireStep transporter
+use App\Livewire\Components\UserDetailsComponent;
+
+protected function actioncrumbs(): array
+{
+    return [
+        Step::make('Dashboard')->url('/dashboard'),
+        Step::make('Users')->route('users.index'),
+
+        // ✅ New WireStep transporter usage
+        WireStep::make(UserDetailsComponent::class, [
+                'user' => $this->user,
+                'userRole' => $this->user->role,
+            ])
+            ->label($this->user->name)
+            ->icon('heroicon-o-user')
+            ->current(true),
+    ];
+}
+```
+
+### Migration Checklist
+
+**For Each WireStep Component:**
+
+- [ ] **Convert class**: Change from `extends WireStep` to regular `Component`
+- [ ] **Add traits**: Use `HasCrumbSteps`, `InteractsWithActions`, `InteractsWithForms`
+- [ ] **Add interfaces**: Implement `HasActions`, `HasForms`
+- [ ] **Simplify mount**: Remove complex signature, use standard Livewire mount
+- [ ] **Update method**: Rename `actioncrumbs()` to `crumbSteps()`
+- [ ] **Replace actions**: Change `WireAction` to regular `Action`
+- [ ] **Update refresh**: Replace `refreshStep()` with `refreshCrumbSteps()`
+- [ ] **Create view**: Add blade template with `renderCrumbSteps()`
+- [ ] **Add render method**: Implement standard Livewire render method
+
+**For Each WireStep Usage:**
+
+- [ ] **Import classes**: Add `WireStep` and component imports
+- [ ] **Update syntax**: Change to `WireStep::make(ComponentClass::class, $params)`
+- [ ] **Remove old params**: Remove `stepData()`, `parent()` calls
+- [ ] **Add standard params**: Use `label()`, `icon()`, `current()`, etc.
+
+### Quick Migration Script
+
+Use this script to help identify WireStep components that need migration:
+
+```bash
+# Find files extending WireStep
+grep -r "extends WireStep" app/
+
+# Find stepData usage
+grep -r "stepData\|refreshStep\|setStepData\|getStepData" app/
+
+# Find WireStep::make usage (old pattern)
+grep -r "WireStep::make.*->" app/
+```
+
+### Benefits After Migration
+
+**🚀 What You Gain:**
+
+- **Maximum Flexibility**: Any Livewire component can be a breadcrumb step
+- **Better Testing**: Test components independently or as embedded steps
+- **Reusability**: Use the same component in multiple contexts
+- **Simplicity**: Standard Livewire patterns throughout
+- **Performance**: Improved rendering and state management
+- **Future-Proof**: Built on stable Livewire foundations
+
+### Need Help?
+
+**Migration Support:**
+
+- 📚 [Full Documentation](#wirestep---embed-livewire-components-as-breadcrumb-steps)
+- 🔧 [API Reference](#wirestep-builder-methods)
+- 💡 [Real-World Examples](#real-world-examples-)
+- 🐛 [GitHub Issues](https://github.com/hdaklue/actioncrumb/issues) for migration questions
+
+**Common Migration Issues:**
+
+- **Component not rendering**: Ensure you have `renderCrumbSteps()` in your blade view
+- **Actions not working**: Add `InteractsWithActions` trait and `HasActions` interface
+- **Missing styles**: Include `<x-filament-actions::modals />` in your component view
+- **Parameter errors**: Check component mount method signature matches passed parameters
 
 ## Tailwind CSS Configuration 🎨
 
