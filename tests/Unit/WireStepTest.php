@@ -237,4 +237,59 @@ describe('WireStep Class', function () {
             ->and($step->hasRoute())->toBeTrue()
             ->and($step->hasUrl())->toBeFalse();
     });
+
+    it('can handle actions properly', function () {
+        $action1 = Action::make('edit')->label('Edit');
+        $action2 = Action::make('delete')->label('Delete');
+        $actions = [$action1, $action2];
+
+        $wireStep = WireStep::make('TestComponent::class')
+            ->actions($actions);
+
+        expect($wireStep->hasActions())->toBeTrue()
+            ->and($wireStep->getActions())->toHaveCount(2)
+            ->and($wireStep->getActions()[0])->toBe($action1)
+            ->and($wireStep->getActions()[1])->toBe($action2);
+    });
+
+    it('reports no actions when empty', function () {
+        $wireStep = WireStep::make('TestComponent::class');
+
+        expect($wireStep->hasActions())->toBeFalse()
+            ->and($wireStep->getActions())->toBeEmpty();
+    });
+
+    it('transfers actions to Step when converted', function () {
+        $action = Action::make('test')->label('Test Action');
+        $wireStep = WireStep::make('TestComponent::class')
+            ->label('Test Step')
+            ->actions([$action]);
+
+        $step = $wireStep->toStep();
+
+        expect($step->hasActions())->toBeTrue()
+            ->and($step->getActions())->toHaveCount(1)
+            ->and($step->getActions()[0])->toBe($action);
+    });
+
+    it('maintains action context when used with other properties', function () {
+        $action = Action::make('publish')
+            ->label('Publish')
+            ->icon('heroicon-o-arrow-up');
+
+        $wireStep = WireStep::make('TestComponent::class', ['id' => 123])
+            ->label('Draft Post')
+            ->icon('heroicon-o-document')
+            ->url('/posts/123')
+            ->current(true)
+            ->actions([$action]);
+
+        expect($wireStep->getLabel())->toBe('Draft Post')
+            ->and($wireStep->getIcon())->toBe('heroicon-o-document')
+            ->and($wireStep->getUrl())->toBe('/posts/123')
+            ->and($wireStep->isCurrent())->toBeTrue()
+            ->and($wireStep->hasActions())->toBeTrue()
+            ->and($wireStep->getActions()[0]->getLabel())->toBe('Publish')
+            ->and($wireStep->getActions()[0]->getIcon())->toBe('heroicon-o-arrow-up');
+    });
 });

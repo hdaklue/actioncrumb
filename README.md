@@ -1877,6 +1877,7 @@ WireStep::make(ComponentClass::class, $parameters)  // Create WireStep with comp
     ->visible(true)                                 // Show/hide step (bool or closure)
     ->enabled(true)                                 // Enable/disable step (bool or closure)
     ->stepId('custom-id')                           // Custom step ID (defaults to class basename)
+    ->actions([Action::make('...')])                // Array of dropdown actions (same as Step)
 
 // Getter methods
 ->getComponentClass()                               // Returns the embedded component class
@@ -1895,9 +1896,86 @@ WireStep::make(ComponentClass::class, $parameters)  // Create WireStep with comp
 ->isClickable()                                     // Returns true if step can be clicked (same as Step)
 ->hasRoute()                                        // Returns true if step has a route (same as Step)
 ->hasUrl()                                          // Returns true if step has a URL (same as Step)
+->hasActions()                                      // Returns true if step has actions
+->getActions()                                      // Returns array of actions
 
 // Utility methods
 ->toStep()                                          // Convert to regular Step (fallback)
+```
+
+**WireStep with Actions Examples:**
+
+```php
+use Hdaklue\Actioncrumb\{Action, WireStep};
+use Hdaklue\Actioncrumb\Support\WireAction;
+
+// Example 1: WireStep with regular actions
+WireStep::make(FlowStepComponent::class, ['flow' => $flow])
+    ->label('Flow Configuration')
+    ->icon('heroicon-o-cog')
+    ->current(true)
+    ->actions([
+        Action::make('edit')
+            ->label('Edit Settings')
+            ->icon('heroicon-o-pencil')
+            ->execute(fn() => $this->dispatch('edit-flow', $flow->id)),
+
+        Action::make('duplicate')
+            ->label('Duplicate Flow')
+            ->icon('heroicon-o-document-duplicate')
+            ->route('flows.duplicate', ['flow' => $flow]),
+
+        Action::make('delete')
+            ->label('Delete Flow')
+            ->icon('heroicon-o-trash')
+            ->execute(fn() => $this->dispatch('delete-flow', $flow->id)),
+    ]);
+
+// Example 2: WireStep with WireActions (Filament integration)
+WireStep::make(UserProfileComponent::class, ['user' => $user])
+    ->label($user->name)
+    ->icon('heroicon-o-user')
+    ->actions([
+        WireAction::make('edit-profile')
+            ->livewire($this)
+            ->label('Edit Profile')
+            ->icon('heroicon-o-pencil')
+            ->execute('editUserProfile'),
+
+        WireAction::make('send-message')
+            ->livewire($this)
+            ->label('Send Message')
+            ->icon('heroicon-o-envelope')
+            ->execute('sendMessage'),
+
+        WireAction::make('view-activity')
+            ->livewire($this)
+            ->label('View Activity')
+            ->icon('heroicon-o-clock')
+            ->execute('viewActivity'),
+    ]);
+
+// Example 3: Mixed WireStep usage in breadcrumbs
+protected function actioncrumbs(): array
+{
+    return [
+        Step::make('dashboard')
+            ->label('Dashboard')
+            ->url('/dashboard'),
+
+        WireStep::make(ProjectSelectorComponent::class, ['team' => $this->team])
+            ->label('Select Project')
+            ->icon('heroicon-o-folder')
+            ->actions([
+                Action::make('new-project')->label('New Project')->icon('heroicon-o-plus'),
+                Action::make('manage-projects')->label('Manage All')->icon('heroicon-o-cog'),
+            ]),
+
+        Step::make('flow')
+            ->label($this->flow->title)
+            ->current(true),
+    ];
+}
 ```
 
 ### WireCrumb Abstract Component
@@ -2519,6 +2597,32 @@ public function render(): string
 ```
 
 **Migration Impact:** These fixes maintain backward compatibility while improving reliability and API consistency. No changes required for existing implementations.
+
+**WireStep Action Rendering Bug (Fixed in v2.0.3)**
+
+**Issue:** WireStep components could not render actions properly. Actions would not appear in dropdowns even when defined on WireStep instances.
+
+**Cause:** The WireStep rendering path in `actioncrumb.blade.php` was missing the action handling logic that regular Steps had. WireStep rendering only included the component embedding but skipped all dropdown action functionality.
+
+**Fix:** Added complete action handling logic to WireStep rendering:
+
+```php
+// Now supported - WireStep with actions
+WireStep::make(FlowComponent::class, ['flow' => $flow])
+    ->label('Flow Configuration')
+    ->actions([
+        Action::make('edit')->label('Edit Settings'),
+        WireAction::make('duplicate')->livewire($this)->execute('duplicateFlow'),
+    ]);
+```
+
+**Benefits:**
+- WireStep now has full action support like regular Steps
+- Supports both regular Actions and WireActions
+- Desktop dropdowns and mobile modals work properly
+- Consistent API between Step and WireStep classes
+
+**Template Changes:** Updated `actioncrumb.blade.php` WireStep rendering (lines 94-277) to include complete action dropdown logic, mobile modal support, and proper event handling.
 
 **Q: Icons not displaying**
 ```bash
