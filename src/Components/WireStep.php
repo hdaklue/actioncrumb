@@ -4,76 +4,65 @@ declare(strict_types=1);
 
 namespace Hdaklue\Actioncrumb\Components;
 
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
-use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
-use Livewire\Component;
+use Hdaklue\Actioncrumb\Step;
+use Livewire\Mechanisms\ComponentRegistry;
 
-class WireStep extends Component implements HasActions, HasSchemas
+/**
+ * WireStep - Transporter for embedding Livewire components as breadcrumb steps
+ *
+ * Usage: WireStep::make(FlowStep::class, ['flowId' => $id, 'tenant' => $tenant])
+ */
+class WireStep
 {
-    use HasActionCrumbs;
-    use InteractsWithActions;
-    use InteractsWithSchemas;
+    protected string $componentClass;
+    protected array $parameters;
+    protected string $stepId;
+    protected ?string $label = null;
+    protected ?string $icon = null;
+    protected ?string $url = null;
+    protected ?string $route = null;
+    protected array $routeParams = [];
+    protected bool $current = false;
+    protected bool $visible = true;
+    protected bool $enabled = true;
 
-    public string $stepId;
-    public string|\Closure|null $label = null;
-    public ?string $icon = null;
-    public string|\Closure|null $url = null;
-    public ?string $route = null;
-    public array $routeParams = [];
-    public bool $current = false;
-    public bool|\Closure $visible = true;
-    public bool|\Closure $enabled = true;
-    public ?HasActions $parent = null;
-    public array $stepData = [];
-
-    protected $listeners = [
-        'actioncrumb:execute' => 'handleActioncrumbAction',
-        'step:refresh' => 'refreshStep',
-    ];
-
-    public function mount(
-        string $stepId,
-        string|\Closure|null $label = null,
-        ?string $icon = null,
-        string|\Closure|null $url = null,
-        ?string $route = null,
-        array $routeParams = [],
-        bool $current = false,
-        bool|\Closure $visible = true,
-        bool|\Closure $enabled = true,
-        ?HasActions $parent = null,
-        array $stepData = []
-    ): void {
-        $this->stepId = $stepId;
-        $this->label = $label;
-        $this->icon = $icon;
-        $this->url = $url;
-        $this->route = $route;
-        $this->routeParams = $routeParams;
-        $this->current = $current;
-        $this->visible = $visible;
-        $this->enabled = $enabled;
-        $this->parent = $parent;
-        $this->stepData = $stepData;
-    }
-
-    public static function make(string $stepId): self
+    protected function __construct(string $componentClass, array $parameters = [])
     {
-        $instance = new static();
-        $instance->stepId = $stepId;
-        return $instance;
+        $this->componentClass = $componentClass;
+        $this->parameters = $parameters;
+        $this->stepId = $parameters['stepId'] ?? class_basename($componentClass);
     }
 
+    /**
+     * Create a new WireStep transporter
+     */
+    public static function make(string $componentClass, array $parameters = []): self
+    {
+        return new self($componentClass, $parameters);
+    }
+
+    /**
+     * Set step label
+     */
+    public function label(string $label): self
+    {
+        $this->label = $label;
+        return $this;
+    }
+
+    /**
+     * Set step icon
+     */
     public function icon(string $icon): self
     {
         $this->icon = $icon;
         return $this;
     }
 
-    public function url(string|\Closure $url): self
+    /**
+     * Set step URL
+     */
+    public function url(string $url): self
     {
         $this->url = $url;
         $this->route = null;
@@ -81,12 +70,9 @@ class WireStep extends Component implements HasActions, HasSchemas
         return $this;
     }
 
-    public function label(string|\Closure $label): self
-    {
-        $this->label = $label;
-        return $this;
-    }
-
+    /**
+     * Set step route
+     */
     public function route(string $route, array $params = []): self
     {
         $this->route = $route;
@@ -95,165 +81,186 @@ class WireStep extends Component implements HasActions, HasSchemas
         return $this;
     }
 
+    /**
+     * Mark as current step
+     */
     public function current(bool $current = true): self
     {
         $this->current = $current;
         return $this;
     }
 
-    public function visible(bool|\Closure $visible): self
+    /**
+     * Set visibility
+     */
+    public function visible(bool $visible = true): self
     {
         $this->visible = $visible;
         return $this;
     }
 
-    public function enabled(bool|\Closure $enabled): self
+    /**
+     * Set enabled state
+     */
+    public function enabled(bool $enabled = true): self
     {
         $this->enabled = $enabled;
         return $this;
     }
 
-    public function stepData(array $data): self
+    /**
+     * Set custom step ID
+     */
+    public function stepId(string $stepId): self
     {
-        $this->stepData = $data;
+        $this->stepId = $stepId;
         return $this;
     }
 
-    public function parent(?HasActions $parent): self
+    /**
+     * Get the component class
+     */
+    public function getComponentClass(): string
     {
-        $this->parent = $parent;
-        return $this;
+        return $this->componentClass;
     }
 
-    public function getId(): string
+    /**
+     * Get the parameters for the component
+     */
+    public function getParameters(): array
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Get step ID
+     */
+    public function getStepId(): string
     {
         return $this->stepId;
     }
 
-    public function getLabel(): string
+    /**
+     * Get step label
+     */
+    public function getLabel(): ?string
     {
-        if ($this->label === null) {
-            return $this->stepId;
-        }
-
-        return is_callable($this->label)
-            ? call_user_func($this->label)
-            : $this->label;
+        return $this->label;
     }
 
+    /**
+     * Get step icon
+     */
     public function getIcon(): ?string
     {
         return $this->icon;
     }
 
+    /**
+     * Get step URL
+     */
     public function getUrl(): ?string
     {
-        return is_callable($this->url)
-            ? call_user_func($this->url)
-            : $this->url;
+        return $this->url;
     }
 
+    /**
+     * Get step route
+     */
     public function getRoute(): ?string
     {
         return $this->route;
     }
 
+    /**
+     * Get route parameters
+     */
     public function getRouteParams(): array
     {
         return $this->routeParams;
     }
 
+    /**
+     * Get resolved URL (route or direct URL)
+     */
     public function getResolvedUrl(): ?string
     {
-        if ($this->hasRoute()) {
+        if ($this->route) {
             return route($this->route, $this->routeParams);
         }
 
-        return $this->getUrl();
+        return $this->url;
     }
 
+    /**
+     * Check if current step
+     */
     public function isCurrent(): bool
     {
         return $this->current;
     }
 
-    public function hasRoute(): bool
-    {
-        return !is_null($this->route);
-    }
-
-    public function hasUrl(): bool
-    {
-        return !is_null($this->url);
-    }
-
-    public function isClickable(): bool
-    {
-        return !$this->current && ($this->hasUrl() || $this->hasRoute()) && $this->isEnabled();
-    }
-
+    /**
+     * Check if visible
+     */
     public function isVisible(): bool
     {
-        return is_callable($this->visible)
-            ? call_user_func($this->visible)
-            : $this->visible;
+        return $this->visible;
     }
 
+    /**
+     * Check if enabled
+     */
     public function isEnabled(): bool
     {
-        return is_callable($this->enabled)
-            ? call_user_func($this->enabled)
-            : $this->enabled;
+        return $this->enabled;
     }
 
-    public function hasActions(): bool
+    /**
+     * Check if this is a WireStep (for template differentiation)
+     */
+    public function isWireStep(): bool
     {
-        return count($this->getActioncrumbs()) > 0;
+        return true;
     }
 
-    public function getActions(): array
+    /**
+     * Render the embedded Livewire component
+     */
+    public function render(): string
     {
-        return $this->getActioncrumbs();
+        $componentRegistry = app(ComponentRegistry::class);
+        $componentName = $componentRegistry->getName($this->componentClass);
+
+        return app('livewire')->mount($componentName, $this->parameters)->html();
     }
 
-    public function refreshStep(): void
+    /**
+     * Convert to a regular Step for fallback rendering
+     */
+    public function toStep(): Step
     {
-        $this->refreshActioncrumbs();
-        $this->dispatch('step:refreshed', ['stepId' => $this->stepId]);
-    }
+        $step = Step::make($this->stepId);
 
-    public function getStepData(string $key = null)
-    {
-        if ($key === null) {
-            return $this->stepData;
+        if ($this->label) {
+            $step->label($this->label);
         }
 
-        return $this->stepData[$key] ?? null;
-    }
+        if ($this->icon) {
+            $step->icon($this->icon);
+        }
 
-    public function setStepData(string $key, $value): void
-    {
-        $this->stepData[$key] = $value;
-    }
+        if ($this->url) {
+            $step->url($this->url);
+        } elseif ($this->route) {
+            $step->route($this->route, $this->routeParams);
+        }
 
-    protected function actioncrumbs(): array
-    {
-        return [];
-    }
+        $step->current($this->current);
+        $step->visible($this->visible);
+        $step->enabled($this->enabled);
 
-    public function render()
-    {
-        return view('hdaklue.actioncrumb::components.step', [
-            'step' => $this,
-            'config' => app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->compact()->compactMenuOnMobile()
-        ]);
-    }
-
-    protected function getListeners(): array
-    {
-        return array_merge(parent::getListeners() ?? [], [
-            'actioncrumb:execute' => 'handleActioncrumbAction',
-            'step:refresh' => 'refreshStep',
-        ]);
+        return $step;
     }
 }

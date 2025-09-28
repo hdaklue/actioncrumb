@@ -5,85 +5,87 @@ declare(strict_types=1);
 namespace Demo\Components;
 
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
-use Hdaklue\Actioncrumb\Components\WireStep;
-use Hdaklue\Actioncrumb\Support\WireAction;
+use Livewire\Component;
+use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;
+use Hdaklue\Actioncrumb\Step;
+use Hdaklue\Actioncrumb\Action as CrumbAction;
 
 /**
- * Demo UserWireStep - Shows WireStep capabilities
+ * Demo UserStepComponent - Livewire component for user management step
+ *
+ * This component is embedded as a WireStep in breadcrumbs using:
+ * WireStep::make(UserStepComponent::class, ['user' => $user])
  *
  * Features demonstrated:
+ * - Full Livewire component embedded as breadcrumb step
  * - Custom Filament Actions with forms
- * - State management with stepData
- * - Parent communication
- * - Dynamic visibility and enabled states
- * - Event handling and refresh
+ * - State management with component properties
+ * - Parent communication via events
+ * - Dynamic breadcrumb actions
  */
-class UserWireStep extends WireStep
+class UserStepComponent extends Component implements HasActions, HasForms
 {
+    use HasCrumbSteps;
+    use InteractsWithActions;
+    use InteractsWithForms;
+
     public ?object $user = null;
     public string $userRole = 'viewer';
+    public ?object $department = null;
 
-    public function mount(
-        string $stepId,
-        string|\Closure|null $label = null,
-        ?string $icon = null,
-        string|\Closure|null $url = null,
-        ?string $route = null,
-        array $routeParams = [],
-        bool $current = false,
-        bool|\Closure $visible = true,
-        bool|\Closure $enabled = true,
-        ?\Filament\Actions\Contracts\HasActions $parent = null,
-        array $stepData = []
-    ): void {
-        parent::mount($stepId, $label, $icon, $url, $route, $routeParams, $current, $visible, $enabled, $parent, $stepData);
-
-        // Load user from step data
-        $this->user = $stepData['user'] ?? null;
-        $this->userRole = $stepData['userRole'] ?? 'viewer';
+    public function mount(?object $user = null, string $userRole = 'viewer', ?object $department = null): void
+    {
+        $this->user = $user ?? $this->createDemoUser();
+        $this->userRole = $userRole;
+        $this->department = $department ?? $this->createDemoDepartment();
     }
 
-    protected function actioncrumbs(): array
+    protected function crumbSteps(): array
     {
         return [
-            WireAction::make('edit-user')
-                ->label('Edit User')
-                ->icon('heroicon-o-pencil')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canEditUser())
-                ->execute('editUser'),
+            Step::make('user-details')
+                ->label($this->user->name ?? 'User Details')
+                ->icon('heroicon-o-user')
+                ->current(true)
+                ->actions([
+                    CrumbAction::make('edit-user')
+                        ->label('Edit User')
+                        ->icon('heroicon-o-pencil')
+                        ->visible(fn() => $this->user && $this->canEditUser())
+                        ->execute(fn() => $this->mountAction('editUser')),
 
-            WireAction::make('change-role')
-                ->label('Change Role')
-                ->icon('heroicon-o-shield-check')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canManageRoles())
-                ->execute('changeRole'),
+                    CrumbAction::make('change-role')
+                        ->label('Change Role')
+                        ->icon('heroicon-o-shield-check')
+                        ->visible(fn() => $this->user && $this->canManageRoles())
+                        ->execute(fn() => $this->mountAction('changeRole')),
 
-            WireAction::make('send-message')
-                ->label('Send Message')
-                ->icon('heroicon-o-envelope')
-                ->livewire($this)
-                ->visible(fn() => $this->user)
-                ->execute('sendMessage'),
+                    CrumbAction::make('send-message')
+                        ->label('Send Message')
+                        ->icon('heroicon-o-envelope')
+                        ->visible(fn() => $this->user)
+                        ->execute(fn() => $this->mountAction('sendMessage')),
 
-            WireAction::make('view-activity')
-                ->label('View Activity')
-                ->icon('heroicon-o-clock')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canViewActivity())
-                ->execute('viewActivity'),
+                    CrumbAction::make('view-activity')
+                        ->label('View Activity')
+                        ->icon('heroicon-o-clock')
+                        ->visible(fn() => $this->user && $this->canViewActivity())
+                        ->execute(fn() => $this->mountAction('viewActivity')),
 
-            WireAction::make('delete-user')
-                ->label('Delete User')
-                ->icon('heroicon-o-trash')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canDeleteUser())
-                ->execute('deleteUser'),
+                    CrumbAction::make('delete-user')
+                        ->label('Delete User')
+                        ->icon('heroicon-o-trash')
+                        ->visible(fn() => $this->user && $this->canDeleteUser())
+                        ->execute(fn() => $this->mountAction('deleteUser')),
+                ])
         ];
     }
 
@@ -126,8 +128,8 @@ class UserWireStep extends WireStep
                     ->success()
                     ->send();
 
-                // Refresh the step to update the label
-                $this->refreshStep();
+                // Refresh the breadcrumb steps
+                $this->refreshCrumbSteps();
 
                 // Notify parent component
                 $this->dispatch('user:updated', ['userId' => $this->user->id, 'name' => $data['name']]);
@@ -163,9 +165,6 @@ class UserWireStep extends WireStep
                 $oldRole = $this->userRole;
                 $this->userRole = $data['role'];
 
-                // Update step data
-                $this->setStepData('userRole', $data['role']);
-
                 Notification::make()
                     ->title('Role changed successfully')
                     ->body("Changed from {$oldRole} to {$data['role']}")
@@ -183,7 +182,7 @@ class UserWireStep extends WireStep
                     ]);
                 }
 
-                $this->refreshStep();
+                $this->refreshCrumbSteps();
             });
     }
 
@@ -280,13 +279,38 @@ class UserWireStep extends WireStep
         return $this->userRole === 'super_admin' && $this->user->id !== auth()->id();
     }
 
-    // Override to show dynamic label
-    public function getLabel(): string
+    // Demo data creation methods
+    private function createDemoUser(): object
     {
-        if ($this->user) {
-            return $this->user->name . " ({$this->userRole})";
-        }
+        return (object) [
+            'id' => 1,
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'phone' => '+1 (555) 123-4567',
+            'role' => 'editor',
+            'department_id' => 1,
+            'created_at' => now(),
+            'last_login' => now()->subHours(2),
+        ];
+    }
 
-        return parent::getLabel();
+    private function createDemoDepartment(): object
+    {
+        return (object) [
+            'id' => 1,
+            'name' => 'Engineering',
+            'description' => 'Software Development Team',
+            'manager_id' => 2,
+            'user_count' => 15,
+        ];
+    }
+
+    public function render()
+    {
+        return view('demo.user-step-component', [
+            'user' => $this->user,
+            'userRole' => $this->userRole,
+            'department' => $this->department,
+        ]);
     }
 }

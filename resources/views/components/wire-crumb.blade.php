@@ -1,4 +1,4 @@
 <div>
-    {!! $renderedActioncrumbs !!}
+    {!! $renderedCrumbSteps !!}
     <x-filament-actions::modals />
 </div>

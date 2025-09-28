@@ -1,14 +1,17 @@
 <?php
 
 /**
- * Demo Usage Example - How to use the UserWireStep
+ * Demo Usage Example - How to use WireStep with embedded Livewire components
  *
- * This shows a practical implementation of the new WireStep feature
+ * This shows the new WireStep transporter implementation that embeds
+ * existing Livewire components as breadcrumb steps
  */
 
 // 1. In your Livewire component or controller:
 
 use Demo\Components\UserManagementCrumb;
+use Demo\Components\UserStepComponent;
+use Hdaklue\Actioncrumb\Components\WireStep;
 
 class UserController extends Controller
 {
@@ -26,8 +29,11 @@ class UserController extends Controller
 
 <x-app-layout>
     <div class="py-6">
-        <!-- Render the breadcrumb with WireStep -->
+        <!-- Option 1: Use WireCrumb (contains multiple steps including WireStep) -->
         @livewire('demo.components.user-management-crumb', ['record' => $user])
+
+        <!-- Option 2: Embed UserStepComponent directly as WireStep -->
+        <!-- @livewire('demo.components.user-step-component', ['user' => $user, 'userRole' => $user->role]) -->
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -75,50 +81,88 @@ class UserController extends Controller
 
 <?php
 
-// 3. Key Features Demonstrated:
+// 3. Alternative: Create WireStep programmatically in your component:
+
+use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;
+
+class UserProfilePage extends Component
+{
+    use HasCrumbSteps;
+
+    public User $user;
+
+    protected function crumbSteps(): array
+    {
+        return [
+            Step::make('dashboard')
+                ->label('Dashboard')
+                ->url('/dashboard'),
+
+            Step::make('users')
+                ->label('Users')
+                ->route('users.index'),
+
+            // Embed UserStepComponent as a WireStep
+            WireStep::make(UserStepComponent::class, [
+                'user' => $this->user,
+                'userRole' => auth()->user()->role ?? 'viewer',
+            ])
+                ->label($this->user->name)
+                ->icon('heroicon-o-user')
+                ->current(true),
+        ];
+    }
+}
+
+// 4. Key Features Demonstrated:
 
 /*
-1. **Fluent API Usage:**
-   UserWireStep::make('user-details')
+1. **WireStep Transporter Usage:**
+   WireStep::make(UserStepComponent::class, ['user' => $user])
        ->label($user->name)
        ->icon('heroicon-o-user')
        ->current(true)
-       ->stepData(['user' => $user])
 
-2. **Dynamic Actions:**
-   - Actions visibility based on user permissions
-   - Real-time form validation
-   - Custom modal forms with Filament components
+2. **Component Embedding:**
+   - Full Livewire components embedded as breadcrumb steps
+   - Component maintains its own state and lifecycle
+   - Parameters passed to component mount method
 
 3. **State Management:**
-   - Step data for passing context
-   - Parent-child communication via events
-   - Automatic refresh after actions
+   - Component properties for state management
+   - Parent-child communication via Livewire events
+   - Independent component refresh capabilities
 
 4. **Event Handling:**
-   - 'user:updated' event from WireStep to parent
-   - 'step:refresh' for updating step state
-   - 'actioncrumb:action-executed' for action tracking
+   - 'user:updated' event from embedded component
+   - 'crumb-steps:refreshed' for step updates
+   - Standard Livewire event system
 
 5. **Permission System:**
-   - Role-based action visibility
+   - Role-based action visibility within component
    - Dynamic enable/disable states
-   - Security checks before action execution
+   - Security checks at component level
 
 6. **Integration with Filament:**
-   - Full form component support
+   - Full form component support within embedded component
    - Notification system
    - Modal dialogs with custom content
 
 7. **Mixed Step Types:**
    - Regular Steps for navigation
-   - WireStep for advanced functionality
-   - Seamless integration in same breadcrumb
+   - WireStep for embedding Livewire components
+   - Fallback to regular Step if component fails
+
+8. **Component Reusability:**
+   - Same component can be used in different contexts
+   - Parameters control component behavior
+   - Component can be used standalone or embedded
 
 Usage Benefits:
-- Reusable components across different contexts
+- Embed any Livewire component as a breadcrumb step
+- Full component lifecycle and state management
 - Consistent UI/UX with existing actioncrumb system
-- Full Livewire reactivity and state management
-- Extensible permission and security system
-- Easy to test and maintain
+- Fallback to regular Step if component fails
+- Easy to test components independently
+- Maximum flexibility for complex breadcrumb steps
 */

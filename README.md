@@ -71,7 +71,7 @@ Dashboard > Users ⌄ > John Doe ⌄
 - [Quick Start](#quick-start-)
 - [Filament Actions Integration](#filament-actions-integration-)
   - [WireAction - Execute Filament Actions](#wireaction---execute-filament-actions-from-breadcrumbs)
-  - [WireStep - Individual Livewire Step Components](#wirestep---individual-livewire-step-components)
+  - [WireStep - Embed Livewire Components as Breadcrumb Steps](#wirestep---embed-livewire-components-as-breadcrumb-steps)
   - [WireCrumb - Dedicated Components](#wirecrumb---dedicated-filament-action-components)
   - [Bulk WireAction Creation](#bulk-wireaction-creation)
   - [Advanced Features](#advanced-features)
@@ -403,68 +403,68 @@ class UsersManagement extends Component implements HasActions, HasSchemas
 }
 ```
 
-### WireStep - Individual Livewire Step Components
+### WireStep - Embed Livewire Components as Breadcrumb Steps
 
-The `WireStep` component extends the regular `Step` with full Livewire capabilities, allowing individual breadcrumb steps to be interactive Livewire components with their own actions, state, and lifecycle:
+The `WireStep` class is a transporter that allows you to embed any existing Livewire component as a breadcrumb step. This provides maximum flexibility for complex breadcrumb functionality:
+
+**1. Create a Livewire Component (Regular Livewire Component):**
 
 ```php
 <?php
 
-namespace App\Livewire\Steps;
+namespace App\Livewire\Components;
 
-use Hdaklue\Actioncrumb\Components\WireStep;
-use Hdaklue\Actioncrumb\Support\WireAction;
+use Livewire\Component;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;
+use Hdaklue\Actioncrumb\{Step, Action};
 use Filament\Actions\Action as FilamentAction;
 use App\Models\User;
 
-class UserDetailsStep extends WireStep
+class UserDetailsComponent extends Component implements HasActions, HasForms
 {
+    use HasCrumbSteps;
+    use InteractsWithActions;
+    use InteractsWithForms;
+
     public ?User $user = null;
     public string $userRole = 'viewer';
 
-    public function mount(
-        string $stepId,
-        string|\Closure|null $label = null,
-        ?string $icon = null,
-        string|\Closure|null $url = null,
-        ?string $route = null,
-        array $routeParams = [],
-        bool $current = false,
-        bool|\Closure $visible = true,
-        bool|\Closure $enabled = true,
-        ?\Filament\Actions\Contracts\HasActions $parent = null,
-        array $stepData = []
-    ): void {
-        parent::mount($stepId, $label, $icon, $url, $route, $routeParams, $current, $visible, $enabled, $parent, $stepData);
-
-        // Extract user data from stepData
-        $this->user = $stepData['user'] ?? null;
-        $this->userRole = $stepData['userRole'] ?? 'viewer';
+    public function mount(?User $user = null, string $userRole = 'viewer'): void
+    {
+        $this->user = $user;
+        $this->userRole = $userRole;
     }
 
-    protected function actioncrumbs(): array
+    protected function crumbSteps(): array
     {
         return [
-            WireAction::make('edit-user')
-                ->label('Edit User')
-                ->icon('heroicon-o-pencil')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canEditUser())
-                ->execute('editUser'),
+            Step::make('user-details')
+                ->label($this->user->name ?? 'User Details')
+                ->icon('heroicon-o-user')
+                ->current(true)
+                ->actions([
+                    Action::make('edit-user')
+                        ->label('Edit User')
+                        ->icon('heroicon-o-pencil')
+                        ->visible(fn() => $this->canEditUser())
+                        ->execute(fn() => $this->mountAction('editUser')),
 
-            WireAction::make('change-role')
-                ->label('Change Role')
-                ->icon('heroicon-o-shield-check')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canManageRoles())
-                ->execute('changeRole'),
+                    Action::make('change-role')
+                        ->label('Change Role')
+                        ->icon('heroicon-o-shield-check')
+                        ->visible(fn() => $this->canManageRoles())
+                        ->execute(fn() => $this->mountAction('changeRole')),
 
-            WireAction::make('view-activity')
-                ->label('View Activity')
-                ->icon('heroicon-o-clock')
-                ->livewire($this)
-                ->visible(fn() => $this->user && $this->canViewActivity())
-                ->execute('viewActivity'),
+                    Action::make('view-activity')
+                        ->label('View Activity')
+                        ->icon('heroicon-o-clock')
+                        ->visible(fn() => $this->canViewActivity())
+                        ->execute(fn() => $this->mountAction('viewActivity')),
+                ])
         ];
     }
 
@@ -490,7 +490,7 @@ class UserDetailsStep extends WireStep
                     ->success()
                     ->send();
 
-                $this->refreshStep(); // Refresh this step's data
+                $this->refreshCrumbSteps(); // Refresh breadcrumb steps
             });
     }
 
@@ -510,14 +510,13 @@ class UserDetailsStep extends WireStep
             ])
             ->action(function (array $data) {
                 $this->userRole = $data['role'];
-                $this->setStepData('userRole', $data['role']);
 
                 \Filament\Notifications\Notification::make()
                     ->title('Role changed successfully')
                     ->success()
                     ->send();
 
-                $this->refreshStep();
+                $this->refreshCrumbSteps();
             });
     }
 
@@ -537,22 +536,22 @@ class UserDetailsStep extends WireStep
         return in_array($this->userRole, ['admin']);
     }
 
-    // Dynamic label based on state
-    public function getLabel(): string
+    public function render()
     {
-        if ($this->user) {
-            return $this->user->name . " ({$this->userRole})";
-        }
-        return parent::getLabel();
+        return view('livewire.user-details-component', [
+            'user' => $this->user,
+            'userRole' => $this->userRole,
+        ]);
     }
 }
 ```
 
-**Using WireStep in your breadcrumbs:**
+**2. Embed the Component as a WireStep:**
 
 ```php
 // In your main Livewire component
-use App\Livewire\Steps\UserDetailsStep;
+use App\Livewire\Components\UserDetailsComponent;
+use Hdaklue\Actioncrumb\Components\WireStep;
 
 protected function actioncrumbs(): array
 {
@@ -565,32 +564,50 @@ protected function actioncrumbs(): array
             ->icon('heroicon-o-users')
             ->route('users.index'),
 
-        // WireStep with its own state and actions
-        WireStep::make('user-details')
-            ->label($this->user->name)
-            ->current()
-            ->stepData([
+        // Embed UserDetailsComponent as a WireStep
+        WireStep::make(UserDetailsComponent::class, [
                 'user' => $this->user,
                 'userRole' => $this->user->role,
             ])
-            ->parent($this), // Reference to parent component
+            ->label($this->user->name)
+            ->icon('heroicon-o-user')
+            ->current(true),
     ];
 }
 ```
 
-**Reusing WireStep Components Across Multiple Views:**
+**3. Create the Component's Blade View:**
 
-The power of WireStep is that you can create reusable step components and use them across different parts of your application:
+```blade
+{{-- resources/views/livewire/user-details-component.blade.php --}}
+<div>
+    <!-- Render the component's breadcrumb steps -->
+    {!! $this->renderCrumbSteps() !!}
+
+    <!-- Your component content -->
+    <div class="mt-6">
+        <h2 class="text-xl font-semibold">{{ $user->name }}</h2>
+        <p class="text-gray-600">Role: {{ $userRole }}</p>
+        <!-- Additional component content -->
+    </div>
+
+    <!-- Filament modals -->
+    <x-filament-actions::modals />
+</div>
+```
+
+**Reusing Components with WireStep Across Multiple Views:**
+
+The power of WireStep is that you can embed any existing Livewire component as a breadcrumb step:
 
 ```php
-// 1. User Profile Page - App\Livewire\Users\ProfilePage
-<?php
-
+// 1. User Profile Page
 namespace App\Livewire\Users;
 
 use Livewire\Component;
 use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\{Step, Components\WireStep};
+use App\Livewire\Components\UserDetailsComponent;
 use App\Models\User;
 
 class ProfilePage extends Component
@@ -605,63 +622,24 @@ class ProfilePage extends Component
             Step::make('Dashboard')->url('/dashboard'),
             Step::make('Users')->route('users.index'),
 
-            // Reuse the UserDetailsStep component
-            WireStep::make('user-details')
-                ->label($this->user->name)
-                ->current()
-                ->stepData([
+            // Embed UserDetailsComponent as WireStep
+            WireStep::make(UserDetailsComponent::class, [
                     'user' => $this->user,
                     'userRole' => $this->user->role,
                 ])
-                ->parent($this),
-        ];
-    }
-}
-
-// 2. User Settings Page - App\Livewire\Users\SettingsPage
-<?php
-
-namespace App\Livewire\Users;
-
-use Livewire\Component;
-use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
-use Hdaklue\Actioncrumb\{Step, Components\WireStep};
-use App\Models\User;
-
-class SettingsPage extends Component
-{
-    use HasActionCrumbs;
-
-    public User $user;
-
-    protected function actioncrumbs(): array
-    {
-        return [
-            Step::make('Dashboard')->url('/dashboard'),
-            Step::make('Users')->route('users.index'),
-
-            // Same WireStep, different context
-            WireStep::make('user-profile')
                 ->label($this->user->name)
-                ->route('users.show', $this->user)
-                ->stepData([
-                    'user' => $this->user,
-                    'userRole' => $this->user->role,
-                ]),
-
-            Step::make('Settings')->current(),
+                ->current(true),
         ];
     }
 }
 
-// 3. Admin User Management - App\Livewire\Admin\UsersManagement
-<?php
-
+// 2. Admin User Management
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\{Step, Components\WireStep};
+use App\Livewire\Components\UserDetailsComponent;
 use App\Models\User;
 
 class UsersManagement extends Component
@@ -677,15 +655,14 @@ class UsersManagement extends Component
             Step::make('Users')->current(),
         ];
 
-        // Conditionally add the user details step when a user is selected
+        // Conditionally embed user component when selected
         if ($this->selectedUser) {
-            $steps[] = WireStep::make('selected-user')
-                ->label($this->selectedUser->name)
-                ->stepData([
+            $steps[] = WireStep::make(UserDetailsComponent::class, [
                     'user' => $this->selectedUser,
                     'userRole' => 'admin', // Override role for admin context
                 ])
-                ->parent($this);
+                ->label($this->selectedUser->name)
+                ->icon('heroicon-o-user');
         }
 
         return $steps;
@@ -694,55 +671,55 @@ class UsersManagement extends Component
     public function selectUser(User $user)
     {
         $this->selectedUser = $user;
-        $this->refreshActioncrumbs(); // Refresh to show new step
+        $this->refreshActioncrumbs();
     }
 }
 ```
 
-**Creating Variations of WireStep for Different Contexts:**
+**Creating Variations of Components for Different Contexts:**
 
-You can create specialized versions of your WireStep for different use cases:
+You can create specialized versions of your components for different use cases:
 
 ```php
 // Extended version for admin context
-<?php
+namespace App\Livewire\Components;
 
-namespace App\Livewire\Steps;
-
-use App\Livewire\Steps\UserDetailsStep;
-use Hdaklue\Actioncrumb\Support\WireAction;
+use App\Livewire\Components\UserDetailsComponent;
+use Hdaklue\Actioncrumb\{Step, Action};
 use Filament\Actions\Action as FilamentAction;
 
-class AdminUserDetailsStep extends UserDetailsStep
+class AdminUserDetailsComponent extends UserDetailsComponent
 {
-    // Inherit all functionality from UserDetailsStep and add admin-specific actions
-    protected function actioncrumbs(): array
+    // Inherit all functionality and add admin-specific actions
+    protected function crumbSteps(): array
     {
-        $actions = parent::actioncrumbs(); // Get base actions
+        $baseSteps = parent::crumbSteps();
 
-        // Add admin-only actions
+        // Add admin-only actions to the step
+        $step = $baseSteps[0]; // Get the user details step
+        $actions = $step->getActions() ?? [];
+
         $adminActions = [
-            WireAction::make('impersonate-user')
+            Action::make('impersonate-user')
                 ->label('Impersonate User')
                 ->icon('heroicon-o-user-circle')
-                ->livewire($this)
                 ->visible(fn() => auth()->user()->can('impersonate', $this->user))
-                ->execute('impersonateUser'),
+                ->execute(fn() => $this->mountAction('impersonateUser')),
 
-            WireAction::make('view-audit-log')
+            Action::make('view-audit-log')
                 ->label('View Audit Log')
                 ->icon('heroicon-o-document-text')
-                ->livewire($this)
-                ->execute('viewAuditLog'),
+                ->execute(fn() => $this->mountAction('viewAuditLog')),
 
-            WireAction::make('reset-password')
+            Action::make('reset-password')
                 ->label('Reset Password')
                 ->icon('heroicon-o-key')
-                ->livewire($this)
-                ->execute('resetPassword'),
+                ->execute(fn() => $this->mountAction('resetPassword')),
         ];
 
-        return array_merge($actions, $adminActions);
+        $step->actions(array_merge($actions, $adminActions));
+
+        return [$step];
     }
 
     public function impersonateUserAction(): FilamentAction
@@ -752,7 +729,6 @@ class AdminUserDetailsStep extends UserDetailsStep
             ->modalHeading('Impersonate User')
             ->modalDescription('You will be logged in as this user. Continue?')
             ->action(function () {
-                // Impersonation logic
                 session(['impersonating' => $this->user->id]);
                 return redirect('/dashboard');
             });
@@ -765,11 +741,11 @@ class AdminUserDetailsStep extends UserDetailsStep
 **Using in Blade Templates:**
 
 ```blade
-{{-- User Profile Page --}}
+{{-- Option 1: Use the component that embeds WireStep --}}
 <div>
     <h1>{{ $user->name }}'s Profile</h1>
 
-    <!-- The WireStep will render with user-specific actions -->
+    <!-- The WireStep will be embedded in these breadcrumbs -->
     {!! $this->renderActioncrumbs() !!}
 
     <div class="mt-6">
@@ -777,58 +753,54 @@ class AdminUserDetailsStep extends UserDetailsStep
     </div>
 </div>
 
-{{-- Admin Users Page --}}
+{{-- Option 2: Use the component directly --}}
 <div>
     <h1>User Management</h1>
 
-    <!-- WireStep appears when user is selected -->
-    {!! $this->renderActioncrumbs() !!}
+    <!-- Embed the component directly -->
+    @livewire(App\Livewire\Components\UserDetailsComponent::class, [
+        'user' => $user,
+        'userRole' => $user->role
+    ])
 
     <div class="mt-6">
-        <!-- User list with selection -->
-        @foreach($users as $user)
-            <div wire:click="selectUser({{ $user->id }})" class="cursor-pointer">
-                {{ $user->name }}
-            </div>
-        @endforeach
+        <!-- Additional content -->
     </div>
 </div>
 ```
 
-**Benefits of Reusable WireStep Components:**
+**Benefits of WireStep Component Embedding:**
 
-- **🔄 DRY Principle** - Write once, use everywhere
-- **🎯 Contextual Actions** - Same user, different actions based on context
-- **⚡ Consistent UX** - Uniform behavior across your application
-- **🛠 Maintainable** - Update user actions in one place
-- **🎨 Flexible** - Easy to extend or customize for specific use cases
+- **🔄 Component Reusability** - Use any existing Livewire component as a breadcrumb step
+- **🎯 Maximum Flexibility** - Full component lifecycle and state management
+- **⚡ Consistent UX** - Seamless integration with existing breadcrumb system
+- **🛠 Easy Testing** - Test components independently or as embedded steps
+- **🎨 Fallback Support** - Automatically falls back to regular Step if component fails
 
 **Key WireStep Features:**
 
-- **Independent State** - Each WireStep maintains its own properties and state
-- **Lifecycle Management** - Full Livewire component lifecycle (mount, hydrate, etc.)
-- **Step Data Storage** - Use `stepData()` to pass data and `getStepData()`/`setStepData()` to manage it
-- **Parent Communication** - Reference parent component for cross-step communication
-- **Refresh Capabilities** - Use `refreshStep()` to update the step after actions
-- **Dynamic Labels** - Override `getLabel()` for dynamic step labels based on state
+- **Component Embedding** - Embed any Livewire component as a breadcrumb step
+- **Parameter Passing** - Pass data to component via mount parameters
+- **Automatic Fallback** - Falls back to regular Step if component class doesn't exist
+- **Fluent API** - Chain methods to configure step appearance and behavior
+- **Error Handling** - Graceful degradation with logging for debugging
 
 **Advanced WireStep Patterns:**
 
 ```php
-// Real-time updates
+// Real-time updates within embedded component
 public function viewActivityAction(): FilamentAction
 {
     return FilamentAction::make('viewActivity')
         ->modalContent(view('user.activity-log', ['user' => $this->user]))
         ->modalSubmitAction(false)
         ->action(function () {
-            // Log the view action
             $this->user->increment('profile_views');
-            $this->refreshStep(); // Update any counters in the step
+            $this->refreshCrumbSteps(); // Update breadcrumb steps
         });
 }
 
-// Cross-step communication
+// Cross-component communication
 public function deleteUserAction(): FilamentAction
 {
     return FilamentAction::make('deleteUser')
@@ -836,28 +808,41 @@ public function deleteUserAction(): FilamentAction
         ->action(function () {
             $this->user->delete();
 
-            // Notify parent to refresh and redirect
+            // Notify other components
             $this->dispatch('user:deleted', ['userId' => $this->user->id]);
 
             return redirect()->route('users.index');
         });
 }
 
-// Conditional step visibility
-public function isVisible(): bool
+// Conditional WireStep usage
+protected function actioncrumbs(): array
 {
-    // Hide step if user doesn't have permission
-    return auth()->user()->can('view', $this->user);
+    $steps = [
+        Step::make('Dashboard')->url('/dashboard'),
+        Step::make('Users')->route('users.index'),
+    ];
+
+    // Only embed component if user has permission
+    if ($this->user && auth()->user()->can('view', $this->user)) {
+        $steps[] = WireStep::make(UserDetailsComponent::class, [
+                'user' => $this->user,
+                'userRole' => $this->user->role,
+            ])
+            ->label($this->user->name)
+            ->current(true);
+    }
+
+    return $steps;
 }
 
-// Dynamic step URL
-public function getResolvedUrl(): ?string
-{
-    if ($this->user) {
-        return route('users.show', $this->user);
-    }
-    return parent::getResolvedUrl();
-}
+// Custom WireStep configuration
+WireStep::make(UserDetailsComponent::class, ['user' => $user])
+    ->label(fn() => $user->name . ' (' . $user->role . ')')
+    ->icon('heroicon-o-user')
+    ->url(fn() => route('users.show', $user))
+    ->visible(fn() => auth()->user()->can('view', $user))
+    ->current(true);
 ```
 
 ### WireCrumb - Dedicated Filament Action Components
@@ -1301,51 +1286,62 @@ WireAction::debug($component)                   // Debug available actions on co
 ### WireStep Builder Methods
 
 ```php
-WireStep::make('step-id')                       // Unique step ID (required)
-    ->label('Display Label')                    // Override label (string or closure)
-    ->icon('heroicon-o-home')                   // Heroicon for the step
-    ->url('/path')                              // Direct URL (string or closure)
-    ->route('route.name', ['param' => 'value']) // Named route with parameters
-    ->current(true)                             // Mark as current/active step
-    ->visible(true)                             // Show/hide step (bool or closure)
-    ->enabled(true)                             // Enable/disable step (bool or closure)
-    ->stepData(['key' => 'value'])              // Pass data to the step component
-    ->parent($component)                        // Reference to parent HasActions component
+WireStep::make(ComponentClass::class, $parameters)  // Create WireStep with component class and parameters
+    ->label('Display Label')                        // Override label (string or closure)
+    ->icon('heroicon-o-home')                       // Heroicon for the step
+    ->url('/path')                                  // Direct URL (string or closure)
+    ->route('route.name', ['param' => 'value'])     // Named route with parameters
+    ->current(true)                                 // Mark as current/active step
+    ->visible(true)                                 // Show/hide step (bool or closure)
+    ->enabled(true)                                 // Enable/disable step (bool or closure)
+    ->stepId('custom-id')                           // Custom step ID (defaults to class basename)
 
-// Lifecycle methods (override in your WireStep class)
-public function mount(...)                      // Component initialization
-public function refreshStep()                   // Refresh step data/state
-public function getStepData($key = null)        // Get step data
-public function setStepData($key, $value)       // Set step data
-public function hasActions()                    // Check if step has actions
-public function getActions()                    // Get step actions
+// Getter methods
+->getComponentClass()                               // Returns the embedded component class
+->getParameters()                                   // Returns parameters passed to component
+->getStepId()                                       // Returns the step ID
+->getLabel()                                        // Returns the step label
+->getIcon()                                         // Returns the step icon
+->getUrl()                                          // Returns direct URL
+->getRoute()                                        // Returns route name
+->getRouteParams()                                  // Returns route parameters
+->getResolvedUrl()                                  // Returns resolved URL (route or direct)
+->isCurrent()                                       // Check if current step
+->isVisible()                                       // Check if visible
+->isEnabled()                                       // Check if enabled
+->isWireStep()                                      // Always returns true (for template differentiation)
 
-// State methods (override for custom behavior)
-public function isVisible()                     // Custom visibility logic
-public function isEnabled()                     // Custom enabled state logic
-public function getLabel()                      // Dynamic label generation
-public function getResolvedUrl()                // Dynamic URL resolution
-
-// Required implementation
-protected function actioncrumbs(): array        // Define step actions (required)
+// Utility methods
+->render()                                          // Render the embedded component
+->toStep()                                          // Convert to regular Step (fallback)
 ```
 
 ### WireCrumb Abstract Component
 
 ```php
 use Hdaklue\Actioncrumb\Components\WireCrumb;
+use Hdaklue\Actioncrumb\Components\WireStep;
 
 class MyCustomCrumb extends WireCrumb
 {
     // Required: Implement actioncrumbs method
-    protected function actioncrumbs(): array { /* ... */ }
-    
+    protected function actioncrumbs(): array {
+        return [
+            Step::make('home')->url('/'),
+
+            // Can include WireStep for embedded components
+            WireStep::make(MyComponent::class, ['param' => 'value'])
+                ->label('Dynamic Step')
+                ->current(true),
+        ];
+    }
+
     // Optional: Override mount for custom initialization
     public function mount($record = null, $parent = null) { /* ... */ }
-    
+
     // Optional: Override render for custom view
     public function render() { /* ... */ }
-    
+
     // Define your Filament Actions
     public function myActionMethodAction(): \Filament\Actions\Action { /* ... */ }
 }
@@ -1354,23 +1350,34 @@ class MyCustomCrumb extends WireCrumb
 ### Component Integration
 
 ```php
+// For regular breadcrumbs
 use HasActionCrumbs;
-
-// Required: Define your breadcrumbs
 protected function actioncrumbs(): array { /* ... */ }
 
-// Optional: Handle action events
-protected function getListeners(): array
-{
-    return array_merge(parent::getListeners() ?? [], [
-        'actioncrumb:action-executed' => 'handleActionResult'
-    ]);
+// For step-based breadcrumbs (including WireStep)
+use HasCrumbSteps;
+protected function crumbSteps(): array {
+    return [
+        Step::make('home')->url('/'),
+        WireStep::make(ComponentClass::class, $params)
+            ->label('Embedded Component')
+            ->current(true),
+    ];
 }
 
-public function handleActionResult($event)
+// Optional: Handle events from embedded components
+protected function getListeners(): array
 {
-    // Handle the result of executed actions
-    $this->dispatch('notify', message: "Action '{$event['action']}' completed!");
+    return [
+        'component:updated' => 'handleComponentUpdate',
+        'crumb-steps:refreshed' => 'handleStepsRefresh',
+    ];
+}
+
+public function handleComponentUpdate($data)
+{
+    // Handle updates from embedded WireStep components
+    $this->refreshActioncrumbs();
 }
 ```
 

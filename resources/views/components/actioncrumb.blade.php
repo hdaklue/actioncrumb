@@ -92,20 +92,43 @@
             @foreach ($steps as $index => $step)
                 @if ($step->isVisible())
                     @if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep)
-                        {{-- Render WireStep as Livewire component --}}
-                        @livewire($step::class, [
-                            'stepId' => $step->getId(),
-                            'label' => $step->label,
-                            'icon' => $step->icon,
-                            'url' => $step->url,
-                            'route' => $step->route,
-                            'routeParams' => $step->routeParams,
-                            'current' => $step->current,
-                            'visible' => $step->visible,
-                            'enabled' => $step->enabled,
-                            'parent' => $step->parent,
-                            'stepData' => $step->stepData
-                        ], key($step->getId() . '-' . $index))
+                        {{-- Render WireStep transporter --}}
+                        <div class="flex flex-shrink-0 items-center">
+                            {{-- WireStep wrapper with step metadata --}}
+                            <div class="flex flex-shrink-0 items-center {{ $config->getStepContainerClasses($step->isCurrent()) }}">
+                                {{-- Step link (if has URL) --}}
+                                @if ($step->getResolvedUrl())
+                                    <a href="{{ $step->getResolvedUrl() }}"
+                                        class="{{ $config->getStepClasses(true, $step->isCurrent()) }}"
+                                        wire:navigate>
+                                        @if ($step->getIcon())
+                                            <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-2 flex-shrink-0" />
+                                        @endif
+                                        <span>{{ $step->getLabel() ?: $step->getStepId() }}</span>
+                                    </a>
+                                @else
+                                    {{-- Non-clickable step --}}
+                                    <span class="{{ $config->getStepClasses(false, $step->isCurrent()) }}">
+                                        @if ($step->getIcon())
+                                            <x-icon name="{{ $step->getIcon() }}" class="w-4 h-4 mr-2 flex-shrink-0" />
+                                        @endif
+                                        <span>{{ $step->getLabel() ?: $step->getStepId() }}</span>
+                                    </span>
+                                @endif
+
+                                {{-- Render the embedded Livewire component --}}
+                                <div class="ml-2">
+                                    @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId() . '-' . $index))
+                                </div>
+                            </div>
+
+                            {{-- Separator (if not last step) --}}
+                            @if (!$loop->last)
+                                <div class="{{ $config->getSeparatorClasses() }}">
+                                    {!! $config->getSeparatorIcon() !!}
+                                </div>
+                            @endif
+                        </div>
                     @else
                         {{-- Regular Step rendering --}}
                         <div class="flex flex-shrink-0 items-center">

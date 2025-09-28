@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Demo\Components;
 
 use Hdaklue\Actioncrumb\Components\WireCrumb;
+use Hdaklue\Actioncrumb\Components\WireStep;
 use Hdaklue\Actioncrumb\Step;
 
 /**
@@ -53,17 +54,15 @@ class UserManagementCrumb extends WireCrumb
                 ->route('users.index')
                 ->icon('heroicon-o-users'),
 
-            // WireStep for advanced user management
-            UserWireStep::make('user-details')
-                ->label($this->user->name ?? 'User Details')
-                ->icon('heroicon-o-user')
-                ->current(true)
-                ->stepData([
+            // WireStep for advanced user management - embeds a Livewire component
+            WireStep::make(UserStepComponent::class, [
                     'user' => $this->user,
                     'userRole' => $this->currentUserRole,
                     'department' => $this->department,
                 ])
-                ->parent($this),
+                ->label($this->user->name ?? 'User Details')
+                ->icon('heroicon-o-user')
+                ->current(true),
         ];
     }
 
