@@ -591,7 +591,7 @@ $steps = [
 @endphp
 
 <div>
-    <!-- Render with manual steps -->
+    <!-- Render with manual steps - each step uses reusable step templates -->
     <x-actioncrumb :steps="$steps" />
 
     <!-- Your component content -->
@@ -1969,7 +1969,7 @@ public function handleComponentUpdate($data)
 
 **Direct Blade Component (Alternative Approach)**
 
-ActionCrumb provides a Blade component for direct usage without traits:
+ActionCrumb provides a main Blade component for direct usage without traits. The architecture uses reusable step templates for rendering individual steps:
 
 ```blade
 {{-- Option 1: With Livewire component context --}}
@@ -2003,6 +2003,18 @@ ActionCrumb provides a Blade component for direct usage without traits:
 - **Flexible step sources** - Pass steps from any source (models, services, etc.)
 - **Reusable** - Same component can be used across different views
 - **Laravel standard** - Uses familiar Blade component syntax
+
+**Component Architecture:**
+
+```
+<x-actioncrumb>                          # Main component container
+├── actioncrumb.blade.php               # Main rendering logic
+├── components/step.blade.php           # Reusable step UI template
+├── components/modals/                  # Mobile modal templates
+└── Individual Step Objects             # Step/WireStep instances
+```
+
+Each step uses the reusable `step.blade.php` template for consistent UI rendering, dropdown actions, and mobile responsiveness.
 
 **Example Integration in Any Blade Template:**
 
