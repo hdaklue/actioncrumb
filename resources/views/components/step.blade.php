@@ -140,8 +140,7 @@
                                 @endif
 
                                 <button
-                                    wire:click="handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}')"
-                                    @click.stop="closeDropdown()"
+                                    @click="$wire.dispatch('actioncrumb:execute', '{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); closeDropdown()"
                                     class="{{ $config->getDropdownItemClasses() }} {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : '' }}"
                                     {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                     @if ($action->getIcon())
@@ -224,8 +223,7 @@
                                     @endif
 
                                     <button
-                                        wire:click="handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}')"
-                                        @click="showActionsModal = false"
+                                        @click="$wire.dispatch('actioncrumb:execute', '{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); showActionsModal = false"
                                         class="flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : '' }}"
                                         {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                         @if ($action->getIcon())

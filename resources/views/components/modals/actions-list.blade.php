@@ -50,7 +50,7 @@
                                     @endif
                                     
                                     <button 
-                                        @click="{{ $action->isEnabled() ? '$wire.handleActioncrumbAction(\'' . md5($step->getLabel() . $action->getLabel() . $actionIndex) . '\', \'' . md5($step->getLabel()) . '\'); showActionsModal = false' : '' }}"
+                                        @click="$wire.dispatch('actioncrumb:execute', '{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); showActionsModal = false"
                                         class="{{ $config->getMobileModalActionItemClasses($action->isEnabled()) }}"
                                         {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                         
