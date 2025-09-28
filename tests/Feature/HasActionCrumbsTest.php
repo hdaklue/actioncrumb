@@ -21,10 +21,6 @@ class TestActionCrumbComponent
         $this->testSteps = $steps;
     }
 
-    public function getListeners(): array
-    {
-        return ['actioncrumb:execute' => 'handleActioncrumbAction'];
-    }
 
     // Mock dispatch method for testing
     public function dispatch($event, $data = []): void

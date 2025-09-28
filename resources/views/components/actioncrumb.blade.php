@@ -251,7 +251,7 @@
                                                 @endif
 
                                                 <button
-                                                    @click="$wire.dispatch('actioncrumb:execute', '{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); closeDropdown()"
+                                                    @click="$wire.handleActioncrumbAction('{{ md5($step->getLabel() . $action->getLabel() . $actionIndex) }}', '{{ md5($step->getLabel()) }}'); closeDropdown()"
                                                     class="{{ $config->getDropdownItemClasses() }} {{ !$action->isEnabled() ? 'opacity-50 cursor-not-allowed' : '' }}"
                                                     {{ !$action->isEnabled() ? 'disabled' : '' }}>
                                                     @if ($action->getIcon())

@@ -2263,17 +2263,13 @@ protected function actioncrumbs(): array
 
 **Q: Actions not executing in dropdown**
 ```php
-// ❌ Wrong: Missing event listener
+// ✅ Correct: Just use the trait
 class MyComponent extends Component
 {
     use HasActionCrumbs;
-    // Missing getListeners() method
-}
 
-// ✅ Correct: Proper trait usage
-class MyComponent extends Component
-{
-    use HasActionCrumbs; // This automatically adds the required listeners
+    // That's it! Actions call handleActioncrumbAction() directly
+    // No listeners or additional setup needed
 }
 ```
 
@@ -2288,7 +2284,7 @@ class MyComponent extends Component
 **Fix:** Added proper type checking before array merge:
 
 ```php
-// ❌ Before (problematic)
+// ❌ Before (problematic - using event listeners)
 protected function getListeners(): array
 {
     return array_merge(
@@ -2297,15 +2293,9 @@ protected function getListeners(): array
     );
 }
 
-// ✅ After (fixed)
-protected function getListeners(): array
-{
-    $parentListeners = parent::getListeners();
-    return array_merge(
-        is_array($parentListeners) ? $parentListeners : [],
-        ['actioncrumb:execute' => 'handleActioncrumbAction']
-    );
-}
+// ✅ After (fixed - removed listeners entirely)
+// Event listeners removed - actions now call handleActioncrumbAction() directly
+// Frontend: @click="$wire.handleActioncrumbAction(actionId, stepId)"
 ```
 
 **WireStep API Consistency (Fixed in v2.0.1)**

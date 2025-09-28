@@ -85,12 +85,4 @@ trait HasActionCrumbs
         return null;
     }
 
-    protected function getListeners(): array
-    {
-        $parentListeners = parent::getListeners();
-        return array_merge(
-            is_array($parentListeners) ? $parentListeners : [],
-            ['actioncrumb:execute' => 'handleActioncrumbAction']
-        );
-    }
 }
