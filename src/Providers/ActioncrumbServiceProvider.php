@@ -2,11 +2,13 @@
 
 namespace Hdaklue\Actioncrumb\Providers;
 
+use Hdaklue\Actioncrumb\Components\ActioncrumbComponent;
 use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;
 use Hdaklue\Actioncrumb\Enums\TailwindColor;
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Hdaklue\Actioncrumb\Services\MobileDetector;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class ActioncrumbServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class ActioncrumbServiceProvider extends ServiceProvider
     {
         $this->loadViews();
         $this->publishAssets();
+        $this->registerBladeComponents();
     }
 
     protected function setupConfig(): void
@@ -59,5 +62,10 @@ class ActioncrumbServiceProvider extends ServiceProvider
                 __DIR__ . '/../../resources/css' => public_path('vendor/actioncrumb'),
             ], 'actioncrumb-assets');
         }
+    }
+
+    protected function registerBladeComponents(): void
+    {
+        Blade::component('actioncrumb', ActioncrumbComponent::class);
     }
 }
