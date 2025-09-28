@@ -53,7 +53,7 @@ abstract class WireCrumb extends Component implements HasActions, HasSchemas
      */
     public function render()
     {
-        return view('hdaklue.actioncrumb::components.wire-crumb', [
+        return view('actioncrumb::components.wire-crumb', [
             'renderedCrumbSteps' => $this->renderCrumbSteps()
         ]);
     }
