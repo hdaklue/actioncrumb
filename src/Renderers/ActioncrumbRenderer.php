@@ -16,7 +16,7 @@ class ActioncrumbRenderer
         // Process steps to handle StepComponent instances
         $processedSteps = $this->processStepsForRendering($steps);
 
-        return View::make('actioncrumb::components.actioncrumb', [
+        return View::make('hdaklue.actioncrumb::components.actioncrumb', [
             'steps' => $processedSteps,
             'config' => $this->config,
             'component' => $component

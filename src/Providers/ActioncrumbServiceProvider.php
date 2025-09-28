@@ -45,14 +45,14 @@ class ActioncrumbServiceProvider extends ServiceProvider
 
     protected function loadViews(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'actioncrumb');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'hdaklue.actioncrumb');
     }
 
     protected function publishAssets(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../resources/views' => resource_path('views/vendor/actioncrumb'),
+                __DIR__ . '/../../resources/views' => resource_path('views/vendor/hdaklue/actioncrumb'),
             ], 'actioncrumb-views');
 
             $this->publishes([
