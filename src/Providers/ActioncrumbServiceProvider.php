@@ -55,7 +55,7 @@ class ActioncrumbServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../resources/views' => resource_path('views/vendor/hdaklue/actioncrumb'),
+                __DIR__ . '/../../resources/views' => resource_path('views/vendor/actioncrumb'),
             ], 'actioncrumb-views');
 
             $this->publishes([
