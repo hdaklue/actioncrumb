@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hdaklue\Actioncrumb\Components;
 
 use Hdaklue\Actioncrumb\Step;
+use Closure;
 
 /**
  * WireStep - Transporter for embedding Livewire components as breadcrumb steps
@@ -16,14 +17,14 @@ class WireStep
     protected string $componentClass;
     protected array $parameters;
     protected string $stepId;
-    protected ?string $label = null;
+    protected string|Closure|null $label = null;
     protected ?string $icon = null;
-    protected ?string $url = null;
+    protected string|Closure|null $url = null;
     protected ?string $route = null;
     protected array $routeParams = [];
     protected bool $current = false;
-    protected bool $visible = true;
-    protected bool $enabled = true;
+    protected bool|Closure $visible = true;
+    protected bool|Closure $enabled = true;
 
     /**
      * Optional actions associated with this step (for menus/modals)
@@ -50,7 +51,7 @@ class WireStep
     /**
      * Set step label
      */
-    public function label(string $label): self
+    public function label(string|Closure $label): self
     {
         $this->label = $label;
         return $this;
@@ -68,7 +69,7 @@ class WireStep
     /**
      * Set step URL
      */
-    public function url(string $url): self
+    public function url(string|Closure $url): self
     {
         $this->url = $url;
         $this->route = null;
@@ -99,7 +100,7 @@ class WireStep
     /**
      * Set visibility
      */
-    public function visible(bool $visible = true): self
+    public function visible(bool|Closure $visible): self
     {
         $this->visible = $visible;
         return $this;
@@ -108,7 +109,7 @@ class WireStep
     /**
      * Set enabled state
      */
-    public function enabled(bool $enabled = true): self
+    public function enabled(bool|Closure $enabled): self
     {
         $this->enabled = $enabled;
         return $this;
@@ -169,7 +170,13 @@ class WireStep
      */
     public function getLabel(): ?string
     {
-        return $this->label;
+        if ($this->label === null) {
+            return null;
+        }
+
+        return is_callable($this->label)
+            ? call_user_func($this->label)
+            : $this->label;
     }
 
     /**
@@ -185,7 +192,9 @@ class WireStep
      */
     public function getUrl(): ?string
     {
-        return $this->url;
+        return is_callable($this->url)
+            ? call_user_func($this->url)
+            : $this->url;
     }
 
     /**
@@ -238,7 +247,9 @@ class WireStep
      */
     public function isVisible(): bool
     {
-        return $this->visible;
+        return is_callable($this->visible)
+            ? call_user_func($this->visible)
+            : $this->visible;
     }
 
     /**
@@ -246,7 +257,9 @@ class WireStep
      */
     public function isEnabled(): bool
     {
-        return $this->enabled;
+        return is_callable($this->enabled)
+            ? call_user_func($this->enabled)
+            : $this->enabled;
     }
 
     /**

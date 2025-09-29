@@ -292,4 +292,53 @@ describe('WireStep Class', function () {
             ->and($wireStep->getActions()[0]->getLabel())->toBe('Publish')
             ->and($wireStep->getActions()[0]->getIcon())->toBe('heroicon-o-arrow-up');
     });
+
+    it('can handle closure labels', function () {
+        $wireStep = WireStep::make('TestComponent::class')
+            ->label(fn() => 'Dynamic Label');
+
+        expect($wireStep->getLabel())->toBe('Dynamic Label');
+    });
+
+    it('can handle closure urls', function () {
+        $wireStep = WireStep::make('TestComponent::class')
+            ->url(fn() => '/dynamic-url');
+
+        expect($wireStep->getUrl())->toBe('/dynamic-url');
+    });
+
+    it('can handle closure visibility', function () {
+        $wireStep = WireStep::make('TestComponent::class')
+            ->visible(fn() => true);
+
+        expect($wireStep->isVisible())->toBeTrue();
+
+        $wireStep->visible(fn() => false);
+        expect($wireStep->isVisible())->toBeFalse();
+    });
+
+    it('can handle closure enabled state', function () {
+        $wireStep = WireStep::make('TestComponent::class')
+            ->enabled(fn() => true);
+
+        expect($wireStep->isEnabled())->toBeTrue();
+
+        $wireStep->enabled(fn() => false);
+        expect($wireStep->isEnabled())->toBeFalse();
+    });
+
+    it('transfers closure properties to Step when converted', function () {
+        $wireStep = WireStep::make('TestComponent::class')
+            ->label(fn() => 'Closure Label')
+            ->url(fn() => '/closure-url')
+            ->visible(fn() => false)
+            ->enabled(fn() => true);
+
+        $step = $wireStep->toStep();
+
+        expect($step->getLabel())->toBe('Closure Label')
+            ->and($step->getUrl())->toBe('/closure-url')
+            ->and($step->isVisible())->toBeFalse()
+            ->and($step->isEnabled())->toBeTrue();
+    });
 });

@@ -226,11 +226,6 @@
                                             @endforeach
                                         </div>
                                     </div>
-
-                                    {{-- Render the embedded Livewire component --}}
-                                    <div class="ml-2">
-                                        @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId() . '-' . $index))
-                                    </div>
                                 </div>
                             @elseif($step->isClickable())
                                 {{-- Clickable WireStep without actions --}}
@@ -244,11 +239,6 @@
                                         @endif
                                         {{ $step->getLabel() ?: $step->getStepId() }}
                                     </a>
-
-                                    {{-- Render the embedded Livewire component --}}
-                                    <div class="ml-2">
-                                        @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId() . '-' . $index))
-                                    </div>
                                 </div>
                             @else
                                 {{-- Current or inactive WireStep --}}
@@ -260,11 +250,6 @@
                                         @endif
                                         {{ $step->getLabel() ?: $step->getStepId() }}
                                     </span>
-
-                                    {{-- Render the embedded Livewire component --}}
-                                    <div class="ml-2">
-                                        @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId() . '-' . $index))
-                                    </div>
                                 </div>
                             @endif
 
