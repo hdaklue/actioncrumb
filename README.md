@@ -124,6 +124,11 @@ Action::make('Settings')->url('/admin/settings')
 
 // Navigate to route
 Action::make('Users')->route('users.index', ['type' => 'active'])
+
+// Using WireAction with Filament actions (recommended)
+$wireAction = WireAction::make('test')->livewire($this);
+$action = $wireAction->execute('testAction'); // Triggers mountAction('testAction')
+// Use $action in Step.actions() array
 ```
 
 ## Advanced Usage
@@ -255,7 +260,7 @@ class UserWireStep extends Component implements HasActions
             });
     }
 
-    // WireStep components return Action array directly
+    // Option 1: Direct Action objects with mountAction
     protected function actioncrumbs(): array
     {
         return [
@@ -266,6 +271,17 @@ class UserWireStep extends Component implements HasActions
             Action::make('Delete')
                 ->icon('heroicon-o-trash')
                 ->execute(fn() => $this->mountAction('delete')),
+        ];
+    }
+
+    // Option 2: Using WireAction for Filament integration
+    protected function actioncrumbsWithWireAction(): array
+    {
+        $wireAction = WireAction::make('user-actions')->livewire($this);
+
+        return [
+            $wireAction->execute('edit'),   // Calls mountAction('edit')
+            $wireAction->execute('delete'), // Calls mountAction('delete')
         ];
     }
 }

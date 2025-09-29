@@ -57,7 +57,8 @@ class Step
 
     public function actions(array $actions): self
     {
-        $this->actions = $actions;
+        $renderer = \Hdaklue\Actioncrumb\Renderers\ActionRenderer::make();
+        $this->actions = $renderer->processActionsForRendering($actions);
         return $this;
     }
 
