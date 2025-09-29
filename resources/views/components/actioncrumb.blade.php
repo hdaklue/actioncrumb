@@ -93,16 +93,39 @@
                 @if ($step->isVisible())
                     @if ($step instanceof \Hdaklue\Actioncrumb\Components\WireStep)
                         {{-- Render WireStep through Livewire component lifecycle --}}
-                        <div class="flex flex-shrink-0 items-center">
-                            @livewire($step->getComponentClass(), $step->getParameters(), key($step->getStepId() . '_' . $index))
+                        @php
+                            try {
+                                $componentClass = $step->getComponentClass();
+                                $parameters = $step->getParameters();
+                                $componentKey = $step->getStepId() . '_' . $index;
+                            } catch (\Exception $e) {
+                                $componentClass = null;
+                                $parameters = [];
+                                $componentKey = 'error_' . $index;
+                                logger()->error('WireStep component error: ' . $e->getMessage());
+                            }
+                        @endphp
 
-                            {{-- Separator (if not last step) --}}
-                            @if (!$loop->last)
-                                <div class="{{ $config->getSeparatorClasses() }}">
-                                    {!! $config->getSeparatorIcon() !!}
+                        <div class="flex flex-shrink-0 items-center">
+                            @if($componentClass && class_exists($componentClass))
+                                @livewire($componentClass, $parameters, key($componentKey))
+                            @else
+                                {{-- Fallback rendering for failed components --}}
+                                <div class="{{ $config->getStepContainerClasses(false) }}">
+                                    <span class="{{ $config->getStepClasses(false, false) }} text-red-600">
+                                        <x-icon name="heroicon-o-exclamation-triangle" class="me-2 h-5 w-5 flex-shrink-0" />
+                                        {{ $step->getLabel() ?? 'Component Error' }}
+                                    </span>
                                 </div>
                             @endif
                         </div>
+
+                        {{-- Separator (if not last step) --}}
+                        @if (!$loop->last)
+                            <div class="{{ $config->getSeparatorClasses() }}">
+                                {!! $config->getSeparatorIcon() !!}
+                            </div>
+                        @endif
                     @else
                         {{-- Regular Step rendering --}}
                         <div class="flex flex-shrink-0 items-center">
