@@ -1,14 +1,18 @@
-{{-- WireStep component template - renders step content without outer container --}}
-{{-- Note: When used as WireStep, the actioncrumb template handles the container structure --}}
+{{-- WireStep component template - complete step rendering including container --}}
+{{-- Note: WireStep components handle their own complete rendering structure --}}
 
-{{-- User step content --}}
-<span class="{{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepClasses(false, true) }}">
-    <x-icon name="heroicon-o-user" class="me-2 h-5 w-5 flex-shrink-0" />
-    {{ $user->name ?? 'User Details' }}
-</span>
+<div class="flex flex-shrink-0 items-center">
+    {{-- Step content with container classes --}}
+    <div class="{{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepContainerClasses(true) }}">
+        <span class="{{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepClasses(false, true) }}">
+            <x-icon name="heroicon-o-user" class="me-2 h-5 w-5 flex-shrink-0" />
+            {{ $user->name ?? 'User Details' }}
+        </span>
+    </div>
 
-{{-- Render step actions using the new method --}}
-{!! $this->renderStepActions() !!}
+    {{-- Render step actions using the new method --}}
+    {!! $this->renderStepActions() !!}
+</div>
 
 {{-- Include Filament Actions --}}
 <x-filament-actions::modals />
