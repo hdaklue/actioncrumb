@@ -33,9 +33,8 @@ describe('HasActionCrumbs Trait Functionality', function () {
     it('can get actioncrumbs from trait', function () {
         $component = new TestActionCrumbComponent();
         $action = Action::make('test')->label('Test Action');
-        $step = Step::make('test')->label('Test Step')->actions([$action]);
 
-        $component->setTestSteps([$step]);
+        $component->setTestSteps([$action]);
         $actioncrumbs = $component->getActioncrumbs();
 
         expect($actioncrumbs)->not->toBeNull();
@@ -44,9 +43,8 @@ describe('HasActionCrumbs Trait Functionality', function () {
     it('caches actioncrumb steps', function () {
         $component = new TestActionCrumbComponent();
         $action = Action::make('test')->label('Test Action');
-        $step = Step::make('test')->label('Test Step')->actions([$action]);
 
-        $component->setTestSteps([$step]);
+        $component->setTestSteps([$action]);
 
         // First call should populate cache
         $firstResult = $component->getActioncrumbs();
@@ -68,15 +66,11 @@ describe('HasActionCrumbs Trait Functionality', function () {
                 return 'executed';
             });
 
-        $step = Step::make('test')
-            ->label('Test Step')
-            ->actions([$action]);
-
-        $component->setTestSteps([$step]);
+        $component->setTestSteps([$action]);
 
         // Calculate the action ID as done in the trait
-        $actionId = md5($step->getLabel() . $action->getLabel() . 0);
-        $stepId = md5($step->getLabel());
+        $actionId = md5('TestActionCrumbComponent' . $action->getLabel() . 0);
+        $stepId = md5('TestActionCrumbComponent');
 
         $result = $component->handleActioncrumbAction($actionId, $stepId);
 
@@ -95,14 +89,10 @@ describe('HasActionCrumbs Trait Functionality', function () {
                 return 'should not execute';
             });
 
-        $step = Step::make('test')
-            ->label('Test Step')
-            ->actions([$action]);
+        $component->setTestSteps([$action]);
 
-        $component->setTestSteps([$step]);
-
-        $actionId = md5($step->getLabel() . $action->getLabel() . 0);
-        $stepId = md5($step->getLabel());
+        $actionId = md5('TestActionCrumbComponent' . $action->getLabel() . 0);
+        $stepId = md5('TestActionCrumbComponent');
 
         $result = $component->handleActioncrumbAction($actionId, $stepId);
 
@@ -117,14 +107,7 @@ describe('HasActionCrumbs Trait Functionality', function () {
             ->label('Test Action')
             ->route('test.route', ['id' => 1]);
 
-        $step = Step::make('test')
-            ->label('Test Step')
-            ->actions([$action]);
-
-        $component->setTestSteps([$step]);
-
-        $actionId = md5($step->getLabel() . $action->getLabel() . 0);
-        $stepId = md5($step->getLabel());
+        $component->setTestSteps([$action]);
 
         // This tests that route actions are handled (even if route doesn't exist in test)
         expect($action->hasRoute())->toBeTrue()
@@ -138,14 +121,10 @@ describe('HasActionCrumbs Trait Functionality', function () {
             ->label('Test Action')
             ->url('/test-url');
 
-        $step = Step::make('test')
-            ->label('Test Step')
-            ->actions([$action]);
+        $component->setTestSteps([$action]);
 
-        $component->setTestSteps([$step]);
-
-        $actionId = md5($step->getLabel() . $action->getLabel() . 0);
-        $stepId = md5($step->getLabel());
+        $actionId = md5('TestActionCrumbComponent' . $action->getLabel() . 0);
+        $stepId = md5('TestActionCrumbComponent');
 
         $result = $component->handleActioncrumbAction($actionId, $stepId);
 
@@ -160,11 +139,10 @@ describe('HasActionCrumbs Trait Functionality', function () {
         expect($result)->toBeNull();
     });
 
-    it('handles steps without actions', function () {
+    it('handles components without actions', function () {
         $component = new TestActionCrumbComponent();
-        $step = Step::make('test')->label('Test Step');
 
-        $component->setTestSteps([$step]);
+        $component->setTestSteps([]);
 
         $result = $component->handleActioncrumbAction('any-id', 'any-step');
 

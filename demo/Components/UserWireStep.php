@@ -51,41 +51,35 @@ class UserStepComponent extends Component implements HasActions, HasForms
     protected function actioncrumbs(): array
     {
         return [
-            Step::make('user-details')
-                ->label($this->user->name ?? 'User Details')
-                ->icon('heroicon-o-user')
-                ->current(true)
-                ->actions([
-                    CrumbAction::make('edit-user')
-                        ->label('Edit User')
-                        ->icon('heroicon-o-pencil')
-                        ->visible(fn() => $this->user && $this->canEditUser())
-                        ->execute(fn() => $this->mountAction('editUser')),
+            CrumbAction::make('edit-user')
+                ->label('Edit User')
+                ->icon('heroicon-o-pencil')
+                ->visible(fn() => $this->user && $this->canEditUser())
+                ->execute(fn() => $this->mountAction('editUser')),
 
-                    CrumbAction::make('change-role')
-                        ->label('Change Role')
-                        ->icon('heroicon-o-shield-check')
-                        ->visible(fn() => $this->user && $this->canManageRoles())
-                        ->execute(fn() => $this->mountAction('changeRole')),
+            CrumbAction::make('change-role')
+                ->label('Change Role')
+                ->icon('heroicon-o-shield-check')
+                ->visible(fn() => $this->user && $this->canManageRoles())
+                ->execute(fn() => $this->mountAction('changeRole')),
 
-                    CrumbAction::make('send-message')
-                        ->label('Send Message')
-                        ->icon('heroicon-o-envelope')
-                        ->visible(fn() => $this->user)
-                        ->execute(fn() => $this->mountAction('sendMessage')),
+            CrumbAction::make('send-message')
+                ->label('Send Message')
+                ->icon('heroicon-o-envelope')
+                ->visible(fn() => $this->user)
+                ->execute(fn() => $this->mountAction('sendMessage')),
 
-                    CrumbAction::make('view-activity')
-                        ->label('View Activity')
-                        ->icon('heroicon-o-clock')
-                        ->visible(fn() => $this->user && $this->canViewActivity())
-                        ->execute(fn() => $this->mountAction('viewActivity')),
+            CrumbAction::make('view-activity')
+                ->label('View Activity')
+                ->icon('heroicon-o-clock')
+                ->visible(fn() => $this->user && $this->canViewActivity())
+                ->execute(fn() => $this->mountAction('viewActivity')),
 
-                    CrumbAction::make('delete-user')
-                        ->label('Delete User')
-                        ->icon('heroicon-o-trash')
-                        ->visible(fn() => $this->user && $this->canDeleteUser())
-                        ->execute(fn() => $this->mountAction('deleteUser')),
-                ])
+            CrumbAction::make('delete-user')
+                ->label('Delete User')
+                ->icon('heroicon-o-trash')
+                ->visible(fn() => $this->user && $this->canDeleteUser())
+                ->execute(fn() => $this->mountAction('deleteUser')),
         ];
     }
 

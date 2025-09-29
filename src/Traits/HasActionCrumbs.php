@@ -7,6 +7,23 @@ use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Renderers\ActioncrumbRenderer;
 use Hdaklue\Actioncrumb\Step;
 
+/**
+ * HasActionCrumbs trait - For individual step components that provide actions
+ *
+ * This trait is used by components that only need to provide actions (not navigation structure).
+ * The actioncrumbs() method MUST return an array of Action objects only.
+ *
+ * For navigation breadcrumb components, use HasCrumbSteps trait instead.
+ *
+ * Usage:
+ * protected function actioncrumbs(): array
+ * {
+ *     return [
+ *         Action::make('Edit')->execute(fn() => $this->edit()),
+ *         Action::make('Delete')->execute(fn() => $this->delete()),
+ *     ];
+ * }
+ */
 trait HasActionCrumbs
 {
     protected array $actioncrumbSteps = [];
@@ -66,58 +83,58 @@ trait HasActionCrumbs
 
     /**
      * Extract actions from actioncrumbs for the current component
+     * Only handles Action objects - actioncrumbs() must return Action[] array
      */
     protected function getActionsFromCrumbs(): array
     {
-        $steps = $this->getActioncrumbs();
-        $allActions = [];
+        $actions = $this->getActioncrumbs();
+        $validActions = [];
 
-        foreach ($steps as $step) {
-            if ($step->hasActions()) {
-                $allActions = array_merge($allActions, $step->getActions());
+        foreach ($actions as $action) {
+            if ($action instanceof Action) {
+                $validActions[] = $action;
             }
         }
 
-        return $allActions;
+        return $validActions;
     }
 
     public function handleActioncrumbAction(string $actionId, string $stepId): mixed
     {
-        $steps = $this->getActioncrumbs();
+        $actions = $this->getActioncrumbs();
+        $stepLabel = class_basename(static::class);
 
-        foreach ($steps as $step) {
-            if (!$step->hasActions()) {
+        foreach ($actions as $index => $action) {
+            if (!($action instanceof Action)) {
                 continue;
             }
 
-            foreach ($step->getActions() as $index => $action) {
-                $currentActionId = md5($step->getLabel() . $action->getLabel() . $index);
+            $currentActionId = md5($stepLabel . $action->getLabel() . $index);
 
-                if ($currentActionId === $actionId) {
-                    // Check if the action is enabled before executing
-                    if (!$action->isEnabled()) {
-                        return null;
-                    }
+            if ($currentActionId === $actionId) {
+                // Check if the action is enabled before executing
+                if (!$action->isEnabled()) {
+                    return null;
+                }
 
-                    if ($action->hasExecute()) {
-                        $result = call_user_func($action->getExecute());
+                if ($action->hasExecute()) {
+                    $result = call_user_func($action->getExecute());
 
-                        $this->dispatch('actioncrumb:action-executed', [
-                            'action' => $action->getLabel(),
-                            'step' => $step->getLabel(),
-                            'result' => $result,
-                        ]);
+                    $this->dispatch('actioncrumb:action-executed', [
+                        'action' => $action->getLabel(),
+                        'step' => $stepLabel,
+                        'result' => $result,
+                    ]);
 
-                        return $result;
-                    }
+                    return $result;
+                }
 
-                    if ($action->hasRoute()) {
-                        return redirect()->route($action->getRoute(), $action->getRouteParams());
-                    }
+                if ($action->hasRoute()) {
+                    return redirect()->route($action->getRoute(), $action->getRouteParams());
+                }
 
-                    if ($action->hasUrl()) {
-                        return redirect($action->getUrl());
-                    }
+                if ($action->hasUrl()) {
+                    return redirect($action->getUrl());
                 }
             }
         }

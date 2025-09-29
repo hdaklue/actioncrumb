@@ -27,7 +27,7 @@ class UserManagementCrumb extends WireCrumb
         $this->currentUserRole = auth()->user()->role ?? 'admin';
     }
 
-    protected function actioncrumbs(): array
+    protected function crumbSteps(): array
     {
         return [
             // Regular Step for navigation
@@ -79,8 +79,8 @@ class UserManagementCrumb extends WireCrumb
         // Handle user update from WireStep
         $this->user->name = $data['name'];
 
-        // Refresh the actioncrumbs to update the label
-        $this->refreshActioncrumbs();
+        // Refresh the crumb steps to update the label
+        $this->refreshCrumbSteps();
 
         \Filament\Notifications\Notification::make()
             ->title('Breadcrumb Updated')

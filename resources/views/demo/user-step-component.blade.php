@@ -10,9 +10,9 @@
         </span>
     </div>
 
-    {{-- Render step actions using the new method --}}
+    {{-- Render step actions with dropdown arrow and mobile modal --}}
     {!! $this->renderStepActions() !!}
 </div>
 
-{{-- Include Filament Actions --}}
+{{-- Include Filament Actions for component's own actions (separate from ActionCrumb actions) --}}
 <x-filament-actions::modals />

@@ -13,6 +13,6 @@
         </span>
     </div>
 
-    {{-- Render actions using the new renderStepActions method --}}
+    {{-- Render actions with dropdown arrow and mobile modal --}}
     {!! $this->renderStepActions() !!}
 </div>
