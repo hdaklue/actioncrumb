@@ -14,7 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Livewire\Component;
-use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\Step;
 use Hdaklue\Actioncrumb\Action as CrumbAction;
 
@@ -33,7 +33,7 @@ use Hdaklue\Actioncrumb\Action as CrumbAction;
  */
 class UserStepComponent extends Component implements HasActions, HasForms
 {
-    use HasCrumbSteps;
+    use HasActionCrumbs;
     use InteractsWithActions;
     use InteractsWithForms;
 
@@ -48,7 +48,7 @@ class UserStepComponent extends Component implements HasActions, HasForms
         $this->department = $department ?? $this->createDemoDepartment();
     }
 
-    protected function crumbSteps(): array
+    protected function actioncrumbs(): array
     {
         return [
             Step::make('user-details')
@@ -129,7 +129,7 @@ class UserStepComponent extends Component implements HasActions, HasForms
                     ->send();
 
                 // Refresh the breadcrumb steps
-                $this->refreshCrumbSteps();
+                $this->refreshActioncrumbs();
 
                 // Notify parent component
                 $this->dispatch('user:updated', ['userId' => $this->user->id, 'name' => $data['name']]);
@@ -182,7 +182,7 @@ class UserStepComponent extends Component implements HasActions, HasForms
                     ]);
                 }
 
-                $this->refreshCrumbSteps();
+                $this->refreshActioncrumbs();
             });
     }
 

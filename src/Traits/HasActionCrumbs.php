@@ -41,6 +41,46 @@ trait HasActionCrumbs
         return ActioncrumbRenderer::make($config)->render($steps, $this);
     }
 
+    /**
+     * Render only the actions/dropdown portion for WireStep components
+     * This allows individual components to render just their actions
+     */
+    public function renderStepActions(?string $stepLabel = null, array $actions = null): string
+    {
+        $actions = $actions ?? $this->getActionsFromCrumbs();
+        $stepLabel = $stepLabel ?? class_basename(static::class);
+
+        if (empty($actions)) {
+            return '';
+        }
+
+        $config = app(ActioncrumbConfig::class);
+
+        return view('actioncrumb::components.step-actions', [
+            'actions' => $actions,
+            'stepLabel' => $stepLabel,
+            'config' => $config,
+            'component' => $this
+        ])->render();
+    }
+
+    /**
+     * Extract actions from actioncrumbs for the current component
+     */
+    protected function getActionsFromCrumbs(): array
+    {
+        $steps = $this->getActioncrumbs();
+        $allActions = [];
+
+        foreach ($steps as $step) {
+            if ($step->hasActions()) {
+                $allActions = array_merge($allActions, $step->getActions());
+            }
+        }
+
+        return $allActions;
+    }
+
     public function handleActioncrumbAction(string $actionId, string $stepId): mixed
     {
         $steps = $this->getActioncrumbs();

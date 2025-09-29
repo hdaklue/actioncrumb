@@ -286,12 +286,12 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;  // ✅ New trait
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;  // ✅ For WireStep components
 use Hdaklue\Actioncrumb\{Step, Action};
 
 class UserDetailsComponent extends Component implements HasActions, HasForms  // ✅ Standard interfaces
 {
-    use HasCrumbSteps;  // ✅ New trait for embedded components
+    use HasActionCrumbs;  // ✅ For WireStep components
     use InteractsWithActions;
     use InteractsWithForms;
 
@@ -345,20 +345,20 @@ class UserDetailsComponent extends Component implements HasActions, HasForms  //
 
 ```blade
 {{-- resources/views/livewire/user-details-component.blade.php --}}
-<div>
-    <!-- ✅ Render the component's breadcrumb steps -->
-    {!! $this->renderCrumbSteps() !!}
+{{-- ✅ NEW v2.0 Pattern: Component renders as breadcrumb step with actions --}}
+<div class="flex flex-shrink-0 items-center {{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepContainerClasses(false) }}">
+    {{-- Step content/label --}}
+    <span class="{{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepClasses(false, true) }}">
+        <x-icon name="heroicon-o-user" class="me-2 h-5 w-5 flex-shrink-0" />
+        {{ $user->name ?? 'User Details' }}
+    </span>
 
-    <!-- Your component content -->
-    <div class="mt-6">
-        <h2 class="text-xl font-semibold">{{ $user->name }}</h2>
-        <p class="text-gray-600">Role: {{ $userRole }}</p>
-        <!-- Additional component content -->
-    </div>
-
-    <!-- ✅ Include Filament modals -->
-    <x-filament-actions::modals />
+    {{-- ✅ Render step actions using the new method --}}
+    {!! $this->renderStepActions() !!}
 </div>
+
+{{-- ✅ Include Filament modals --}}
+<x-filament-actions::modals />
 ```
 
 #### Step 3: Update WireStep Usage
@@ -413,7 +413,7 @@ protected function actioncrumbs(): array
 **For Each WireStep Component:**
 
 - [ ] **Convert class**: Change from `extends WireStep` to regular `Component`
-- [ ] **Add traits**: Use `HasCrumbSteps`, `InteractsWithActions`, `InteractsWithForms`
+- [ ] **Add traits**: Use `HasActionCrumbs`, `InteractsWithActions`, `InteractsWithForms`
 - [ ] **Add interfaces**: Implement `HasActions`, `HasForms`
 - [ ] **Simplify mount**: Remove complex signature, use standard Livewire mount
 - [ ] **Update method**: Rename `actioncrumbs()` to `crumbSteps()`
@@ -994,14 +994,14 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Hdaklue\Actioncrumb\Traits\HasCrumbSteps;
+use Hdaklue\Actioncrumb\Traits\HasActionCrumbs;
 use Hdaklue\Actioncrumb\{Step, Action};
 use Filament\Actions\Action as FilamentAction;
 use App\Models\User;
 
 class UserDetailsComponent extends Component implements HasActions, HasForms
 {
-    use HasCrumbSteps;
+    use HasActionCrumbs;
     use InteractsWithActions;
     use InteractsWithForms;
 
@@ -1014,7 +1014,7 @@ class UserDetailsComponent extends Component implements HasActions, HasForms
         $this->userRole = $userRole;
     }
 
-    protected function crumbSteps(): array
+    protected function actioncrumbs(): array
     {
         return [
             Step::make('user-details')
@@ -1155,20 +1155,20 @@ protected function actioncrumbs(): array
 
 ```blade
 {{-- resources/views/livewire/user-details-component.blade.php --}}
-<div>
-    <!-- Render the component's breadcrumb steps -->
-    {!! $this->renderCrumbSteps() !!}
+{{-- ✅ NEW v2.0 Pattern: Component renders as breadcrumb step with actions --}}
+<div class="flex flex-shrink-0 items-center {{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepContainerClasses(false) }}">
+    {{-- Step content/label --}}
+    <span class="{{ app(\Hdaklue\Actioncrumb\Config\ActioncrumbConfig::class)->getStepClasses(false, true) }}">
+        <x-icon name="heroicon-o-user" class="me-2 h-5 w-5 flex-shrink-0" />
+        {{ $user->name ?? 'User Details' }}
+    </span>
 
-    <!-- Your component content -->
-    <div class="mt-6">
-        <h2 class="text-xl font-semibold">{{ $user->name }}</h2>
-        <p class="text-gray-600">Role: {{ $userRole }}</p>
-        <!-- Additional component content -->
-    </div>
-
-    <!-- Filament modals -->
-    <x-filament-actions::modals />
+    {{-- ✅ Render step actions using the new method --}}
+    {!! $this->renderStepActions() !!}
 </div>
+
+{{-- ✅ Include Filament modals --}}
+<x-filament-actions::modals />
 ```
 
 **Reusing Components with WireStep Across Multiple Views:**
@@ -1343,6 +1343,36 @@ class AdminUserDetailsComponent extends UserDetailsComponent
     </div>
 </div>
 ```
+
+#### ✅ New in v2.0: Proper Livewire Lifecycle
+
+**ActionCrumb v2.0 fixes the major WireStep mounting issue** by using `@livewire()` for proper component lifecycle:
+
+**How it works:**
+1. **WireStep triggers `@livewire()`** - The template now calls `@livewire($component, $parameters)`
+2. **Mount gets called properly** - Your `mount()` method receives parameters correctly
+3. **Component renders itself** - Your component template controls its own rendering
+4. **Actions render through `renderStepActions()`** - New method extracts just the actions portion
+
+**Before v2.0 (Broken):**
+```php
+// ❌ WireStep was just a data container - mount() never called
+WireStep::make(FlowStep::class, ['record' => $flowId])
+// Result: Only showed static label, no actions, no proper lifecycle
+```
+
+**v2.0 (Fixed):**
+```php
+// ✅ WireStep triggers full Livewire lifecycle
+WireStep::make(FlowStep::class, ['record' => $flowId])
+// Result: mount() called, component renders, actions work properly
+```
+
+**Key Changes in Your Component:**
+1. **Use `HasActionCrumbs`** instead of `HasCrumbSteps`
+2. **Use `actioncrumbs()`** method instead of `crumbSteps()`
+3. **Use `renderStepActions()`** in template instead of `renderCrumbSteps()`
+4. **Component renders as breadcrumb step** - template controls appearance
 
 **Benefits of WireStep Component Embedding:**
 
@@ -2016,7 +2046,7 @@ class MyCustomCrumb extends WireCrumb
 use HasActionCrumbs;
 protected function actioncrumbs(): array { /* ... */ }
 
-// For step-based breadcrumbs (including WireStep)
+// For step-based breadcrumbs (including WireStep) - in parent components
 use HasCrumbSteps;
 protected function crumbSteps(): array {
     return [
