@@ -25,27 +25,6 @@ abstract class WireCrumb extends Component implements HasActions, HasSchemas
     use InteractsWithActions;
     use InteractsWithSchemas;
 
-    protected ?HasActions $parent = null;
-
-    /**
-     * Static factory method for creating instances.
-     */
-    public static function make(?HasActions $parent = null): static
-    {
-        $instance = new static();
-        $instance->parent = $parent;
-
-        return $instance;
-    }
-
-    /**
-     * Mount the component with optional record and parent.
-     * Override this method in child classes to handle specific records.
-     */
-    public function mount($record = null, $parent = null)
-    {
-        $this->parent = $parent;
-    }
 
     /**
      * Render the component view.
