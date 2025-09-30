@@ -148,6 +148,22 @@
     border-left-color: #64748b; /* slate-500 */
 }
 
+/* Simple Theme: No Background */
+.actioncrumb-container.no-background .theme-simple .actioncrumb-step {
+    background-color: transparent;
+    border-left-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-simple .actioncrumb-step.is-current {
+    background-color: transparent;
+    border-left-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-simple .actioncrumb-step:hover:not(.is-current) {
+    background-color: transparent;
+    border-left-color: transparent;
+}
+
 /* Rounded Theme: Modern flat pill design */
 .actioncrumb-container .theme-rounded {
     --theme-transition: var(--actioncrumb-transition-normal);
@@ -185,6 +201,22 @@
 .dark .actioncrumb-container .theme-rounded .actioncrumb-step:hover:not(.is-current) {
     background-color: #475569; /* slate-600 */
     border-color: #64748b; /* slate-500 */
+}
+
+/* Rounded Theme: No Background */
+.actioncrumb-container.no-background .theme-rounded .actioncrumb-step {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-rounded .actioncrumb-step.is-current {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+    background-color: transparent;
+    border-color: transparent;
 }
 
 /* Square Theme: Bold flat geometric design */
@@ -240,6 +272,26 @@
 .dark .actioncrumb-container .theme-square .actioncrumb-step:hover:not(.is-current) {
     background-color: #334155; /* slate-700 */
     border-color: #64748b; /* slate-500 */
+}
+
+/* Square Theme: No Background */
+.actioncrumb-container.no-background .theme-square .actioncrumb-step {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-square .actioncrumb-step.is-current {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.actioncrumb-container.no-background .theme-square .actioncrumb-step.is-current::before {
+    display: none;
+}
+
+.actioncrumb-container.no-background .theme-square .actioncrumb-step:hover:not(.is-current) {
+    background-color: transparent;
+    border-color: transparent;
 }
 
 /* =================================================================

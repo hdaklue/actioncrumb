@@ -77,6 +77,11 @@ class UsersManagement extends WireCrumb
 
 ### 3. Include Required CSS/JS
 
+Add to your `resources/css/app.css` (Tailwind 4):
+```css
+@import "../../../../vendor/hdaklue/actioncrumb/resources/css/actioncrumb.css";
+```
+
 Add to your layout:
 ```blade
 <!-- Tailwind CSS (required) -->
@@ -247,6 +252,7 @@ class AppServiceProvider extends ServiceProvider
             ->separatorType(SeparatorType::Chevron)  // Chevron, Line
             ->primaryColor(TailwindColor::Blue)      // Any Tailwind color
             ->secondaryColor(TailwindColor::Gray)    // Secondary accents
+            ->background(true)                       // Enable/disable subtle backgrounds (default: true)
             ->enableDropdowns(true)                  // Enable/disable dropdowns
             ->compact(false)                         // Compact spacing
             ->compactMenuOnMobile(true)              // Mobile-specific behavior
@@ -297,6 +303,19 @@ Choose between different separator styles:
 // Vertical lines
 ->separatorType(SeparatorType::Line)
 ```
+
+### Background Configuration
+
+Control breadcrumb item backgrounds (enabled by default):
+```php
+// Enable subtle backgrounds for breadcrumb items (default)
+->background(true)
+
+// Disable backgrounds for a minimal, text-only appearance
+->background(false)
+```
+
+When enabled, breadcrumb items display subtle background colors based on the configured `primaryColor` and `secondaryColor`, creating a more defined breadcrumb appearance. When disabled, only text colors are applied for a cleaner, minimal look.
 
 ### Mobile Configuration
 

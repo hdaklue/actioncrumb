@@ -28,7 +28,7 @@
     currentStep: null,
     isMobileDevice: @js($isMobileDevice),
     isCompactMenu: @js($shouldUseCompactMenu)
-}" class="actioncrumb-container overflow-y-visible">
+}" class="actioncrumb-container overflow-y-visible {{ !$config->isBackgroundEnabled() ? 'no-background' : '' }}">
 
     @if ($shouldUseCompactMenu)
         {{-- Mobile Modal View --}}

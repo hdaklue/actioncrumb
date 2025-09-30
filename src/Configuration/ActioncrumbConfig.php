@@ -15,6 +15,7 @@ class ActioncrumbConfig
     protected bool $enableDropdowns = true;
     protected bool $compact = false;
     protected bool $compactMenuOnMobile = false;
+    protected bool $enableBackground = true;
     protected array $themes = [];
 
     public static function make(): self
@@ -66,6 +67,12 @@ class ActioncrumbConfig
         return $this;
     }
 
+    public function background(bool $enable = true): self
+    {
+        $this->enableBackground = $enable;
+        return $this;
+    }
+
     public function registerTheme(string $name, array $classes): self
     {
         $this->themes[$name] = $classes;
@@ -112,6 +119,11 @@ class ActioncrumbConfig
     public function isCompactMenuOnMobile(): bool
     {
         return $this->compactMenuOnMobile;
+    }
+
+    public function isBackgroundEnabled(): bool
+    {
+        return $this->enableBackground;
     }
 
     public function getContainerClasses(): string
