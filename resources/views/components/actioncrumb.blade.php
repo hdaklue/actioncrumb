@@ -255,7 +255,7 @@
 
                     @if (!$loop->last)
                         {{-- Configurable Separator --}}
-                        <div class="flex items-center justify-center">
+                        <div class="{{ $config->getSeparatorClasses() }}">
                             {!! $config->getSeparatorType()->getSvg() !!}
                         </div>
                     @endif

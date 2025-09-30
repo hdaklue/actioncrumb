@@ -249,7 +249,7 @@ class AppServiceProvider extends ServiceProvider
     {
         ActioncrumbConfig::make()
             ->themeStyle(ThemeStyle::Rounded)        // Simple, Rounded, Square
-            ->separatorType(SeparatorType::Chevron)  // Chevron, Line
+            ->separatorType(SeparatorType::Chevron)  // Chevron, Line, Backslash
             ->primaryColor(TailwindColor::Blue)      // Any Tailwind color
             ->secondaryColor(TailwindColor::Gray)    // Secondary accents
             ->background(true)                       // Enable/disable subtle backgrounds (default: true)
@@ -302,6 +302,9 @@ Choose between different separator styles:
 
 // Vertical lines
 ->separatorType(SeparatorType::Line)
+
+// Forward slash
+->separatorType(SeparatorType::Backslash)
 ```
 
 ### Background Configuration

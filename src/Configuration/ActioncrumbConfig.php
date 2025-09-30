@@ -456,4 +456,9 @@ class ActioncrumbConfig
     {
         return "h-4 w-4 text-{$this->secondaryColor->value}-400";
     }
+
+    public function getSeparatorClasses(): string
+    {
+        return 'flex items-center justify-center px-1';
+    }
 }
