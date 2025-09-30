@@ -220,6 +220,22 @@ class ActioncrumbConfig
     {
         // Basic dropdown trigger classes with proper color configuration
         $padding = $this->compact ? 'p-1' : 'p-1.5';
+
+        // Apply dynamic background and border colors based on enableBackground
+        $bgClasses = '';
+        $borderClasses = '';
+
+        if ($this->enableBackground) {
+            $bgClasses = "bg-{$this->secondaryColor->value}-50 dark:bg-{$this->secondaryColor->value}-800/40";
+            $borderClasses = match ($this->themeStyle) {
+                ThemeStyle::Simple => "rounded-md border-l-3 border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
+                ThemeStyle::Rounded => "rounded-full border border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
+                ThemeStyle::Square => "rounded-none border border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
+            };
+        } else {
+            $borderClasses = 'rounded-md';
+        }
+
         $classes = [
             'inline-flex',
             'items-center',
@@ -229,22 +245,23 @@ class ActioncrumbConfig
             'hover:text-' . $this->primaryColor->value . '-600',
             'dark:text-' . $this->secondaryColor->value . '-400',
             'dark:hover:text-' . $this->primaryColor->value . '-400',
-            'hover:bg-' . $this->secondaryColor->value . '-50',
-            'dark:hover:bg-' . $this->secondaryColor->value . '-800/50',
-            'rounded-md',
+            'hover:bg-' . $this->primaryColor->value . '-100',
+            'dark:hover:bg-' . $this->primaryColor->value . '-800/40',
             'transition-colors',
-            'duration-150'
+            'duration-150',
+            $bgClasses,
+            $borderClasses
         ];
-        
+
         // Add theme class for CSS targeting
         $themeClass = match ($this->themeStyle) {
             ThemeStyle::Simple => 'theme-simple',
             ThemeStyle::Rounded => 'theme-rounded',
             ThemeStyle::Square => 'theme-square',
         };
-        
+
         $classes[] = $themeClass;
-        
+
         return implode(' ', $classes);
     }
 
