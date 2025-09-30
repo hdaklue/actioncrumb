@@ -39,7 +39,7 @@
                 <div class="{{ $config->getMobileCurrentStepContainerClasses() }}">
                     @if ($lastVisibleStep->getIcon())
                         <x-icon name="{{ $lastVisibleStep->getIcon() }}"
-                            class="me-2 h-4 w-4 flex-shrink-0 text-{{ $config->getSecondaryColor()->value }}-500" />
+                            class="me-2 h-4 w-4 flex-shrink-10 text-{{ $config->getSecondaryColor()->value }}-500" />
                     @endif
                     <span class="{{ $config->getCurrentStepMobileLabelClasses() }}">
                         {{ $lastVisibleStep->getLabel() }}

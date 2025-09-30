@@ -164,7 +164,7 @@ class ActioncrumbConfig
         if ($this->enableBackground) {
             if ($isCurrent) {
                 // Use configured primary color for current step background with proper dark mode
-                $backgroundClasses = "bg-{$this->primaryColor->value}-100 dark:bg-{$this->primaryColor->value}-800";
+                $backgroundClasses = "bg-{$this->primaryColor->value}-100 dark:bg-{$this->primaryColor->value}-800/40";
 
                 // Add theme-specific border radius and border with dark mode support
                 $borderClasses = match ($this->themeStyle) {
