@@ -163,24 +163,24 @@ class ActioncrumbConfig
 
         if ($this->enableBackground) {
             if ($isCurrent) {
-                // Use configured primary color for current step background with proper dark mode
-                $backgroundClasses = "bg-{$this->primaryColor->value}-100 dark:bg-{$this->primaryColor->value}-800/40";
+                // Use brighter secondary color for current step (neutral, not attention-grabbing)
+                $backgroundClasses = "bg-{$this->secondaryColor->value}-100 dark:bg-{$this->secondaryColor->value}-800/50";
 
                 // Add theme-specific border radius and border with dark mode support
                 $borderClasses = match ($this->themeStyle) {
-                    ThemeStyle::Simple => "rounded-md border-l-3 border-{$this->primaryColor->value}-500 dark:border-{$this->primaryColor->value}-400",
-                    ThemeStyle::Rounded => "rounded-full border border-{$this->primaryColor->value}-600 dark:border-{$this->primaryColor->value}-500",
-                    ThemeStyle::Square => "rounded-none border border-{$this->primaryColor->value}-500 dark:border-{$this->primaryColor->value}-400",
+                    ThemeStyle::Simple => "rounded-md border-l-3 border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
+                    ThemeStyle::Rounded => "rounded-full border border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
+                    ThemeStyle::Square => "rounded-none border border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
                 };
             } else {
-                // Use configured secondary color for non-current step background with proper dark mode
-                $backgroundClasses = "bg-{$this->secondaryColor->value}-50 dark:bg-{$this->secondaryColor->value}-800/40";
+                // Use lighter secondary color for non-current steps
+                $backgroundClasses = "bg-{$this->secondaryColor->value}-50 dark:bg-{$this->secondaryColor->value}-800/30";
 
                 // Add theme-specific border radius and border with dark mode support
                 $borderClasses = match ($this->themeStyle) {
-                    ThemeStyle::Simple => "rounded-md border-l-3 border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
-                    ThemeStyle::Rounded => "rounded-full border border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
-                    ThemeStyle::Square => "rounded-none border border-{$this->secondaryColor->value}-300 dark:border-{$this->secondaryColor->value}-700",
+                    ThemeStyle::Simple => "rounded-md border-l-3 border-{$this->secondaryColor->value}-200 dark:border-{$this->secondaryColor->value}-700",
+                    ThemeStyle::Rounded => "rounded-full border border-{$this->secondaryColor->value}-200 dark:border-{$this->secondaryColor->value}-700",
+                    ThemeStyle::Square => "rounded-none border border-{$this->secondaryColor->value}-200 dark:border-{$this->secondaryColor->value}-700",
                 };
             }
         }
