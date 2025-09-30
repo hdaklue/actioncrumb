@@ -154,6 +154,9 @@ class ActioncrumbConfig
         // Add current state class
         $currentClass = $isCurrent ? 'is-current' : '';
 
+        // Add slight padding for breathing room
+        $paddingClasses = 'px-2 py-1';
+
         // Add background colors and borders if background is enabled
         $backgroundClasses = '';
         $borderClasses = '';
@@ -171,7 +174,7 @@ class ActioncrumbConfig
                 };
             } else {
                 // Use configured secondary color for non-current step background with proper dark mode
-                $backgroundClasses = "bg-{$this->secondaryColor->value}-50 dark:bg-{$this->secondaryColor->value}-800";
+                $backgroundClasses = "bg-{$this->secondaryColor->value}-50 dark:bg-{$this->secondaryColor->value}-800/40";
 
                 // Add theme-specific border radius and border with dark mode support
                 $borderClasses = match ($this->themeStyle) {
@@ -182,7 +185,7 @@ class ActioncrumbConfig
             }
         }
 
-        return trim("{$baseClasses} {$themeClass} {$currentClass} {$backgroundClasses} {$borderClasses}");
+        return trim("{$baseClasses} {$themeClass} {$currentClass} {$paddingClasses} {$backgroundClasses} {$borderClasses}");
     }
 
     public function getStepClasses(bool $isClickable, bool $isCurrent, bool $hasDropdown = false): string
