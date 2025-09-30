@@ -143,18 +143,25 @@ class ActioncrumbConfig
     {
         // Use our consolidated CSS classes - styling is now handled by CSS
         $baseClasses = 'actioncrumb-step';
-        
+
         // Add theme-specific classes
         $themeClass = match ($this->themeStyle) {
             ThemeStyle::Simple => 'theme-simple',
             ThemeStyle::Rounded => 'theme-rounded',
             ThemeStyle::Square => 'theme-square',
         };
-        
+
         // Add current state class
         $currentClass = $isCurrent ? 'is-current' : '';
-        
-        return trim("{$baseClasses} {$themeClass} {$currentClass}");
+
+        // Add background colors if background is enabled
+        $backgroundClasses = '';
+        if ($this->enableBackground && $isCurrent) {
+            // Use configured primary color for current step background
+            $backgroundClasses = "bg-{$this->primaryColor->value}-100 dark:bg-{$this->primaryColor->value}-900/20";
+        }
+
+        return trim("{$baseClasses} {$themeClass} {$currentClass} {$backgroundClasses}");
     }
 
     public function getStepClasses(bool $isClickable, bool $isCurrent, bool $hasDropdown = false): string

@@ -115,61 +115,17 @@
    ================================================================= */
 
 /* Simple Theme: Ultra-clean minimal flat design */
-.actioncrumb-container .theme-simple {
+.actioncrumb-container .actioncrumb-step.theme-simple {
     --theme-transition: var(--actioncrumb-transition-normal);
-}
-
-.actioncrumb-container .theme-simple .actioncrumb-step {
-    padding: var(--actioncrumb-spacing-sm) var(--actioncrumb-spacing-md);
     border-radius: var(--actioncrumb-border-radius-md);
-    border-left: 3px solid transparent;
     transition: all var(--theme-transition);
 }
 
-.actioncrumb-container .theme-simple .actioncrumb-step.is-current {
-    background-color: #dbeafe; /* blue-100 */
-    border-left-color: #3b82f6; /* blue-500 */
-    color: #1e40af; /* blue-800 */
-}
-
-.dark .actioncrumb-container .theme-simple .actioncrumb-step.is-current {
-    background-color: rgba(59, 130, 246, 0.15); /* blue-500/15 */
-    border-left-color: #60a5fa; /* blue-400 */
-    color: #93c5fd; /* blue-300 */
-}
-
-.actioncrumb-container .theme-simple .actioncrumb-step:hover:not(.is-current) {
-    background-color: #f8fafc; /* slate-50 */
-    border-left-color: #64748b; /* slate-500 */
-}
-
-.dark .actioncrumb-container .theme-simple .actioncrumb-step:hover:not(.is-current) {
-    background-color: rgba(148, 163, 184, 0.1); /* slate-400/10 */
-    border-left-color: #64748b; /* slate-500 */
-}
-
-/* Simple Theme: No Background */
-.actioncrumb-container.no-background .theme-simple .actioncrumb-step {
-    background-color: transparent;
-    border-left-color: transparent;
-}
-
-.actioncrumb-container.no-background .theme-simple .actioncrumb-step.is-current {
-    background-color: transparent;
-    border-left-color: transparent;
-}
-
-.actioncrumb-container.no-background .theme-simple .actioncrumb-step:hover:not(.is-current) {
-    background-color: transparent;
-    border-left-color: transparent;
-}
+/* Note: Background colors and borders are handled by Tailwind utility classes from config */
 
 /* Rounded Theme: Modern flat pill design */
-.actioncrumb-container .theme-rounded {
+.actioncrumb-container .actioncrumb-step.theme-rounded {
     --theme-transition: var(--actioncrumb-transition-normal);
-}
-
-.actioncrumb-container .theme-rounded .actioncrumb-step {
     padding: var(--actioncrumb-spacing-md) var(--actioncrumb-spacing-lg);
     border-radius: var(--actioncrumb-border-radius-full);
     border: 1px solid transparent;
@@ -177,44 +133,44 @@
     background-color: #f8fafc; /* slate-50 */
 }
 
-.dark .actioncrumb-container .theme-rounded .actioncrumb-step {
+.dark .actioncrumb-container .actioncrumb-step.theme-rounded {
     background-color: #334155; /* slate-700 */
 }
 
-.actioncrumb-container .theme-rounded .actioncrumb-step.is-current {
+.actioncrumb-container .actioncrumb-step.theme-rounded.is-current {
     background-color: #3b82f6; /* blue-500 */
     color: #ffffff;
     border-color: #2563eb; /* blue-600 */
 }
 
-.dark .actioncrumb-container .theme-rounded .actioncrumb-step.is-current {
+.dark .actioncrumb-container .actioncrumb-step.theme-rounded.is-current {
     background-color: #3b82f6; /* blue-500 */
     color: #ffffff;
     border-color: #1d4ed8; /* blue-700 */
 }
 
-.actioncrumb-container .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+.actioncrumb-container .actioncrumb-step.theme-rounded:hover:not(.is-current) {
     background-color: #e2e8f0; /* slate-200 */
     border-color: #cbd5e1; /* slate-300 */
 }
 
-.dark .actioncrumb-container .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+.dark .actioncrumb-container .actioncrumb-step.theme-rounded:hover:not(.is-current) {
     background-color: #475569; /* slate-600 */
     border-color: #64748b; /* slate-500 */
 }
 
 /* Rounded Theme: No Background */
-.actioncrumb-container.no-background .theme-rounded .actioncrumb-step {
+.actioncrumb-container.no-background .actioncrumb-step.theme-rounded {
     background-color: transparent;
     border-color: transparent;
 }
 
-.actioncrumb-container.no-background .theme-rounded .actioncrumb-step.is-current {
+.actioncrumb-container.no-background .actioncrumb-step.theme-rounded.is-current {
     background-color: transparent;
     border-color: transparent;
 }
 
-.actioncrumb-container.no-background .theme-rounded .actioncrumb-step:hover:not(.is-current) {
+.actioncrumb-container.no-background .actioncrumb-step.theme-rounded:hover:not(.is-current) {
     background-color: transparent;
     border-color: transparent;
 }

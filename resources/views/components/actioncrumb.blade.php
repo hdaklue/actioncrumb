@@ -28,7 +28,7 @@
     currentStep: null,
     isMobileDevice: @js($isMobileDevice),
     isCompactMenu: @js($shouldUseCompactMenu)
-}" class="actioncrumb-container overflow-y-visible {{ !$config->isBackgroundEnabled() ? 'no-background' : '' }}">
+}" class="actioncrumb-container overflow-y-visible {{ !$config->isBackgroundEnabled() ? 'no-background' : '' }}" data-primary-color="{{ $config->getPrimaryColor()->value }}" data-secondary-color="{{ $config->getSecondaryColor()->value }}">
 
     @if ($shouldUseCompactMenu)
         {{-- Mobile Modal View --}}
