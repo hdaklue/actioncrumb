@@ -223,6 +223,106 @@ class UserWireStep extends Component implements HasActions
 
 ## Configuration
 
+ActionCrumb provides a fluent configuration API to customize appearance and behavior globally.
+
+### Global Configuration
+
+Configure ActionCrumb in your `AppServiceProvider`:
+
+```php
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Hdaklue\Actioncrumb\Configuration\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Enums\{ThemeStyle, SeparatorType, TailwindColor};
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        ActioncrumbConfig::make()
+            ->themeStyle(ThemeStyle::Rounded)        // Simple, Rounded, Square
+            ->separatorType(SeparatorType::Chevron)  // Chevron, Line
+            ->primaryColor(TailwindColor::Blue)      // Any Tailwind color
+            ->secondaryColor(TailwindColor::Gray)    // Secondary accents
+            ->enableDropdowns(true)                  // Enable/disable dropdowns
+            ->compact(false)                         // Compact spacing
+            ->compactMenuOnMobile(true)              // Mobile-specific behavior
+            ->bind();
+    }
+}
+```
+
+### Theme Styles
+
+**Simple** - Clean, minimal design:
+```php
+ActioncrumbConfig::make()->themeStyle(ThemeStyle::Simple)
+```
+
+**Rounded** - Modern pill design:
+```php
+ActioncrumbConfig::make()->themeStyle(ThemeStyle::Rounded)
+```
+
+**Square** - Bold geometric design:
+```php
+ActioncrumbConfig::make()->themeStyle(ThemeStyle::Square)
+```
+
+### Available Colors
+
+All Tailwind colors are supported:
+```php
+// Primary colors (current step, active states)
+->primaryColor(TailwindColor::Blue)
+->primaryColor(TailwindColor::Purple)
+->primaryColor(TailwindColor::Green)
+
+// Secondary colors (other steps, borders)
+->secondaryColor(TailwindColor::Gray)
+->secondaryColor(TailwindColor::Slate)
+->secondaryColor(TailwindColor::Zinc)
+```
+
+### Separator Types
+
+Choose between different separator styles:
+```php
+// Chevron arrows (default)
+->separatorType(SeparatorType::Chevron)
+
+// Vertical lines
+->separatorType(SeparatorType::Line)
+```
+
+### Mobile Configuration
+
+Control mobile behavior:
+```php
+// Show full breadcrumb with horizontal scroll on mobile
+->compactMenuOnMobile(false)
+
+// Show compact menu with hamburger on mobile
+->compactMenuOnMobile(true)
+```
+
+### Complete Configuration Example
+
+```php
+ActioncrumbConfig::make()
+    ->themeStyle(ThemeStyle::Rounded)
+    ->separatorType(SeparatorType::Chevron)
+    ->primaryColor(TailwindColor::Purple)
+    ->secondaryColor(TailwindColor::Slate)
+    ->enableDropdowns(true)
+    ->compact(false)
+    ->compactMenuOnMobile(true)
+    ->bind();
+```
+
 ### Styling
 Publish views for customization:
 ```bash
