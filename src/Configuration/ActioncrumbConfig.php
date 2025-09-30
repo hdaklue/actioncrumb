@@ -1,6 +1,6 @@
 <?php
 
-namespace Hdaklue\Actioncrumb\Config;
+namespace Hdaklue\Actioncrumb\Configuration;
 
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;

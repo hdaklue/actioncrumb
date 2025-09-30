@@ -3,7 +3,7 @@
 namespace Hdaklue\Actioncrumb\Traits;
 
 use Hdaklue\Actioncrumb\Action;
-use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Configuration\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Renderers\ActioncrumbRenderer;
 use Hdaklue\Actioncrumb\Step;
 

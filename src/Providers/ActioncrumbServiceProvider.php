@@ -2,7 +2,7 @@
 
 namespace Hdaklue\Actioncrumb\Providers;
 
-use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Configuration\ActioncrumbConfig;
 use Hdaklue\Actioncrumb\Enums\SeparatorType;
 use Hdaklue\Actioncrumb\Enums\TailwindColor;
 use Hdaklue\Actioncrumb\Enums\ThemeStyle;

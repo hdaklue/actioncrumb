@@ -2,7 +2,7 @@
 
 namespace Hdaklue\Actioncrumb\Renderers;
 
-use Hdaklue\Actioncrumb\Config\ActioncrumbConfig;
+use Hdaklue\Actioncrumb\Configuration\ActioncrumbConfig;
 use Illuminate\Support\Facades\View;
 
 class ActioncrumbRenderer
