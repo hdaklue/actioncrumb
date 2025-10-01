@@ -101,9 +101,6 @@
 /* Flat Text Rendering */
 .actioncrumb-container nav a,
 .actioncrumb-container nav span {
-    white-space: normal;
-    word-break: break-word;
-    hyphens: auto;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -390,7 +387,6 @@
     .actioncrumb-container nav span {
         min-height: 44px;
         line-height: 1.2;
-        max-width: 100px; /* Narrower on mobile */
         padding: var(--actioncrumb-spacing-sm) !important;
     }
     

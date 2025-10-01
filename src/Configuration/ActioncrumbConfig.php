@@ -190,8 +190,8 @@ class ActioncrumbConfig
 
     public function getStepClasses(bool $isClickable, bool $isCurrent, bool $hasDropdown = false): string
     {
-        $classes = ['inline-flex items-center'];
-        
+        $classes = ['inline-flex items-center whitespace-nowrap'];
+
         // Apply color scheme based on current state and configuration
         if ($isCurrent) {
             // Current step uses primary color
@@ -200,7 +200,7 @@ class ActioncrumbConfig
         } else {
             // Other steps use secondary color
             $classes[] = 'text-' . $this->secondaryColor->value . '-600 dark:text-' . $this->secondaryColor->value . '-400';
-            
+
             if ($isClickable) {
                 // Add hover states for clickable steps
                 $classes[] = 'hover:text-' . $this->primaryColor->value . '-700 dark:hover:text-' . $this->primaryColor->value . '-300';
@@ -208,11 +208,11 @@ class ActioncrumbConfig
                 $classes[] = 'cursor-pointer';
             }
         }
-        
+
         // Add padding based on compact mode
         $padding = $this->compact ? 'px-2 py-1' : 'px-3 py-2';
         $classes[] = $padding;
-        
+
         return implode(' ', $classes);
     }
 
