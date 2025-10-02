@@ -277,7 +277,7 @@ class ActioncrumbConfig
         // Modern shadow system with layered depth
         $shadow = 'shadow-xl ring-1 ring-black/5';
 
-        // Enhanced dropdown with modern spacing and smooth transitions
+        // Enhanced dropdown with compact spacing
         $classes = [
             'bg-white dark:bg-gray-800',
             'border border-' . $this->secondaryColor->value . '-200 dark:border-' . $this->secondaryColor->value . '-700',
@@ -285,9 +285,8 @@ class ActioncrumbConfig
             'min-w-48 max-w-80 max-h-80',
             'overflow-y-auto',
             $shadow,
-            'py-2',  // Generous padding for modern spacing
+            'py-1',  // Compact padding
             'backdrop-blur-sm',  // Subtle blur for depth
-            'transition-all duration-150',  // Smooth appearance
         ];
 
         return implode(' ', $classes);
@@ -302,17 +301,17 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'mx-1 rounded-sm',      // Minimal rounding for square theme
         };
 
-        // Modern minimal dropdown items with smooth interactions
+        // Compact dropdown items with smooth interactions
         $classes = [
-            'flex items-center gap-3',
+            'flex items-center gap-2.5',
             'w-full text-start',
-            'px-3 py-2.5',  // Generous padding for touch-friendly targets
+            'px-3 py-2',  // Compact padding
             'text-sm font-medium',
             'text-' . $this->secondaryColor->value . '-700 dark:text-' . $this->secondaryColor->value . '-200',
             'hover:bg-' . $this->primaryColor->value . '-50 hover:text-' . $this->primaryColor->value . '-700',
             'dark:hover:bg-' . $this->primaryColor->value . '-900/20 dark:hover:text-' . $this->primaryColor->value . '-300',
             'active:bg-' . $this->primaryColor->value . '-100 dark:active:bg-' . $this->primaryColor->value . '-800/30',
-            'transition-all duration-150',  // Smooth transitions
+            'transition-colors duration-150',  // Simple color transitions only
             'cursor-pointer',
             $itemRadius,
         ];
