@@ -428,8 +428,8 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-md',  // Add subtle rounding for modern feel
         };
 
-        // Enhanced action items with smooth transitions and better padding
-        $baseClasses = "w-full flex items-center px-3.5 py-3 min-h-[2.5rem] text-start {$borderRadius} transition-all duration-150 font-medium";
+        // Compact action items with smaller text for breadcrumb context
+        $baseClasses = "w-full flex items-center px-3 py-2 min-h-[2rem] text-start text-sm {$borderRadius} transition-all duration-150 font-medium";
 
         if ($isEnabled) {
             $hoverClasses = "text-{$this->secondaryColor->value}-700 dark:text-{$this->secondaryColor->value}-200 hover:bg-{$this->primaryColor->value}-50 hover:text-{$this->primaryColor->value}-700 dark:hover:bg-{$this->primaryColor->value}-900/15 dark:hover:text-{$this->primaryColor->value}-300 active:bg-{$this->primaryColor->value}-100 dark:active:bg-{$this->primaryColor->value}-800/25";
@@ -447,7 +447,7 @@ class ActioncrumbConfig
 
     public function getMobileModalHeaderClasses(): string
     {
-        return "text-lg font-medium leading-6 text-{$this->secondaryColor->value}-900 dark:text-{$this->secondaryColor->value}-100";
+        return "text-base font-medium leading-6 text-{$this->secondaryColor->value}-900 dark:text-{$this->secondaryColor->value}-100";
     }
 
     public function getMobileModalIconClasses(): string
