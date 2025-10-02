@@ -429,7 +429,7 @@ class ActioncrumbConfig
         };
 
         // Compact action items with smaller text for breadcrumb context
-        $baseClasses = "w-full flex items-center px-3 py-2 min-h-[2rem] text-start text-sm {$borderRadius} transition-all duration-150 font-medium";
+        $baseClasses = "w-full flex items-center gap-2.5 px-3 py-2 min-h-[2rem] text-start text-sm {$borderRadius} transition-all duration-150 font-medium";
 
         if ($isEnabled) {
             $hoverClasses = "text-{$this->secondaryColor->value}-700 dark:text-{$this->secondaryColor->value}-200 hover:bg-{$this->primaryColor->value}-50 hover:text-{$this->primaryColor->value}-700 dark:hover:bg-{$this->primaryColor->value}-900/15 dark:hover:text-{$this->primaryColor->value}-300 active:bg-{$this->primaryColor->value}-100 dark:active:bg-{$this->primaryColor->value}-800/25";
