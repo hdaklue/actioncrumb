@@ -26,12 +26,19 @@
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             class="{{ $config->getMobileModalContainerClasses() }}">
             
-            {{-- Header --}}
+            {{-- Header with Back Button --}}
             <div class="flex items-center justify-between mb-4">
-                <h3 class="{{ $config->getMobileModalHeaderClasses() }}">
-                    Actions
-                </h3>
-                <button 
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="showActionsModal = false; showBreadcrumbModal = true"
+                        class="{{ $config->getMobileModalCloseButtonClasses() }}">
+                        <x-icon name="heroicon-o-arrow-left" class="w-5 h-5" />
+                    </button>
+                    <h3 class="{{ $config->getMobileModalHeaderClasses() }}" x-text="currentStepLabel || 'Actions'">
+                        Actions
+                    </h3>
+                </div>
+                <button
                     @click="showActionsModal = false"
                     class="{{ $config->getMobileModalCloseButtonClasses() }}">
                     <x-icon name="heroicon-o-x-mark" class="w-6 h-6" />

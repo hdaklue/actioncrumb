@@ -26,6 +26,7 @@
     showBreadcrumbModal: false,
     showActionsModal: false,
     currentStep: null,
+    currentStepLabel: '',
     isMobileDevice: @js($isMobileDevice),
     isCompactMenu: @js($shouldUseCompactMenu)
 }" class="actioncrumb-container overflow-y-visible {{ !$config->isBackgroundEnabled() ? 'no-background' : '' }}" data-primary-color="{{ $config->getPrimaryColor()->value }}" data-secondary-color="{{ $config->getSecondaryColor()->value }}">
@@ -185,7 +186,7 @@
                                 class="relative ms-1">
                                     {{-- Mobile: Use modal button --}}
                                     <button x-show="isMobile" x-cloak
-                                        @click="currentStep = {{ $index }}; showActionsModal = true"
+                                        @click="currentStep = {{ $index }}; currentStepLabel = '{{ $step->getLabel() }}'; showActionsModal = true"
                                         class="{{ $config->getMobileButtonClasses() }}">
                                         <x-icon name="heroicon-o-ellipsis-vertical" class="h-5 w-5" />
                                     </button>

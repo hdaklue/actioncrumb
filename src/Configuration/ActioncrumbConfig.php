@@ -379,7 +379,7 @@ class ActioncrumbConfig
         return "relative transform overflow-hidden {$borderRadius} bg-white dark:bg-gray-800 {$shadow} px-4 pb-4 pt-5 text-start transition-all duration-200 w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0 border border-{$this->secondaryColor->value}-200 dark:border-{$this->secondaryColor->value}-700";
     }
 
-    public function getMobileModalItemClasses(): string
+    public function getMobileModalItemClasses(bool $isCurrent = false): string
     {
         // Theme-specific border radius with modern spacing
         $borderRadius = match ($this->themeStyle) {
@@ -388,7 +388,18 @@ class ActioncrumbConfig
             ThemeStyle::Square => 'rounded-md',  // Add subtle rounding for modern feel
         };
 
-        // Enhanced modal items with smooth interactions
+        // Apply background and border styling similar to desktop steps when item is current
+        if ($isCurrent) {
+            $backgroundClasses = "bg-{$this->secondaryColor->value}-100 dark:bg-{$this->secondaryColor->value}-800/50";
+            $borderClasses = match ($this->themeStyle) {
+                ThemeStyle::Simple => "border-l-3 border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
+                ThemeStyle::Rounded => "border border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
+                ThemeStyle::Square => "border border-{$this->secondaryColor->value}-400 dark:border-{$this->secondaryColor->value}-500",
+            };
+            return "flex items-center justify-between p-3.5 {$borderRadius} {$backgroundClasses} {$borderClasses} transition-all duration-150";
+        }
+
+        // Enhanced modal items with smooth interactions for non-current items
         return "flex items-center justify-between p-3.5 {$borderRadius} hover:bg-{$this->primaryColor->value}-50 dark:hover:bg-{$this->primaryColor->value}-900/10 active:bg-{$this->primaryColor->value}-100 dark:active:bg-{$this->primaryColor->value}-800/20 transition-all duration-150";
     }
 

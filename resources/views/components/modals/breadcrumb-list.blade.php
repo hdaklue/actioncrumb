@@ -42,15 +42,15 @@
             <nav class="space-y-2">
                 @foreach($steps as $index => $step)
                     @if($step->isVisible())
-                        <div class="{{ $config->getMobileModalItemClasses() }}">
+                        <div class="{{ $config->getMobileModalItemClasses($step->isCurrent()) }}">
                             <div class="{{ $config->getMobileModalItemContentClasses() }}">
                                 @if($step->getIcon())
                                     <x-icon name="{{ $step->getIcon() }}" class="{{ $config->getMobileModalIconClasses() }}" />
                                 @endif
-                                
+
                                 @if($step->isClickable())
-                                    <a 
-                                        href="{{ $step->getResolvedUrl() }}" 
+                                    <a
+                                        href="{{ $step->getResolvedUrl() }}"
                                         wire:navigate
                                         @click="showBreadcrumbModal = false"
                                         class="{{ $config->getMobileStepClasses($step->isClickable(), $step->isCurrent()) }}">
@@ -62,11 +62,11 @@
                                     </span>
                                 @endif
                             </div>
-                            
+
                             {{-- Action Button --}}
                             @if($step->hasActions() && $config->isDropdownsEnabled())
-                                <button 
-                                    @click="currentStep = {{ $index }}; showBreadcrumbModal = false; showActionsModal = true"
+                                <button
+                                    @click="currentStep = {{ $index }}; currentStepLabel = '{{ $step->getLabel() }}'; showBreadcrumbModal = false; showActionsModal = true"
                                     class="{{ $config->getMobileModalActionButtonClasses() }}">
                                     <x-icon name="heroicon-o-ellipsis-vertical" class="w-5 h-5" />
                                 </button>
