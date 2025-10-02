@@ -267,43 +267,56 @@ class ActioncrumbConfig
 
     public function getDropdownMenuClasses(): string
     {
-        // Theme-specific border radius
+        // Theme-specific border radius for modern minimal look
         $borderRadius = match ($this->themeStyle) {
-            ThemeStyle::Simple => 'rounded-md',    // Medium radius
-            ThemeStyle::Rounded => 'rounded-xl',   // Extra large radius
-            ThemeStyle::Square => 'rounded-none',  // No radius
+            ThemeStyle::Simple => 'rounded-lg',    // Larger radius for modern look
+            ThemeStyle::Rounded => 'rounded-2xl',  // Extra large radius for pill aesthetic
+            ThemeStyle::Square => 'rounded-md',    // Subtle rounding for modern feel
         };
-        
-        // Use Tailwind classes with proper color configuration
+
+        // Modern shadow system with layered depth
+        $shadow = 'shadow-xl ring-1 ring-black/5';
+
+        // Enhanced dropdown with modern spacing and smooth transitions
         $classes = [
             'bg-white dark:bg-gray-800',
-            'border border-' . $this->secondaryColor->value . '-200 dark:border-' . $this->secondaryColor->value . '-600',
+            'border border-' . $this->secondaryColor->value . '-200 dark:border-' . $this->secondaryColor->value . '-700',
             $borderRadius,
             'min-w-48 max-w-80 max-h-80',
             'overflow-y-auto',
-            'shadow-lg',
-            'py-1', // Small padding for proper item spacing
+            $shadow,
+            'py-2',  // Generous padding for modern spacing
+            'backdrop-blur-sm',  // Subtle blur for depth
+            'transition-all duration-150',  // Smooth appearance
         ];
-        
+
         return implode(' ', $classes);
     }
 
     public function getDropdownItemClasses(): string
     {
-        // Use Tailwind classes with proper color configuration
+        // Theme-specific styling for dropdown items
+        $itemRadius = match ($this->themeStyle) {
+            ThemeStyle::Simple => 'mx-1 rounded-md',      // Inner spacing with rounded corners
+            ThemeStyle::Rounded => 'mx-1 rounded-lg',     // Larger rounded corners for pill theme
+            ThemeStyle::Square => 'mx-1 rounded-sm',      // Minimal rounding for square theme
+        };
+
+        // Modern minimal dropdown items with smooth interactions
         $classes = [
             'flex items-center gap-3',
             'w-full text-start',
-            'px-4 py-2', // Better padding for full-width items
-            'text-sm',
-            'text-' . $this->secondaryColor->value . '-700 dark:text-' . $this->secondaryColor->value . '-300',
-            'hover:bg-' . $this->secondaryColor->value . '-100 hover:text-' . $this->primaryColor->value . '-700',
-            'dark:hover:bg-' . $this->secondaryColor->value . '-800 dark:hover:text-' . $this->primaryColor->value . '-300',
-            'transition-colors duration-150',
+            'px-3 py-2.5',  // Generous padding for touch-friendly targets
+            'text-sm font-medium',
+            'text-' . $this->secondaryColor->value . '-700 dark:text-' . $this->secondaryColor->value . '-200',
+            'hover:bg-' . $this->primaryColor->value . '-50 hover:text-' . $this->primaryColor->value . '-700',
+            'dark:hover:bg-' . $this->primaryColor->value . '-900/20 dark:hover:text-' . $this->primaryColor->value . '-300',
+            'active:bg-' . $this->primaryColor->value . '-100 dark:active:bg-' . $this->primaryColor->value . '-800/30',
+            'transition-all duration-150',  // Smooth transitions
             'cursor-pointer',
-            'border-0 rounded-none', // No borders or radius
+            $itemRadius,
         ];
-        
+
         return implode(' ', $classes);
     }
 
@@ -347,29 +360,37 @@ class ActioncrumbConfig
 
     public function getMobileModalBackdropClasses(): string
     {
-        return 'fixed inset-0 bg-black bg-opacity-50 transition-opacity';
+        // Enhanced backdrop with smooth blur effect and modern opacity
+        return 'fixed inset-0 bg-gray-900/60 dark:bg-black/70 backdrop-blur-sm transition-all duration-200';
     }
 
     public function getMobileModalContainerClasses(): string
     {
+        // Theme-specific border radius and visual accents
         $borderRadius = match ($this->themeStyle) {
-            ThemeStyle::Simple => 'rounded-lg',
-            ThemeStyle::Rounded => 'rounded-xl',
-            ThemeStyle::Square => 'rounded-none',
+            ThemeStyle::Simple => 'rounded-xl',      // Smooth modern corners
+            ThemeStyle::Rounded => 'rounded-2xl',    // Extra rounded for pill aesthetic
+            ThemeStyle::Square => 'rounded-md',      // Subtle rounding for modern feel
         };
 
-        return "relative transform overflow-hidden {$borderRadius} bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-start shadow-xl transition-all w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0";
+        // Modern shadow system with subtle elevation
+        $shadow = 'shadow-2xl ring-1 ring-black/5';
+
+        // Enhanced container with modern spacing and borders
+        return "relative transform overflow-hidden {$borderRadius} bg-white dark:bg-gray-800 {$shadow} px-4 pb-4 pt-5 text-start transition-all duration-200 w-full max-w-full mx-4 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:mx-0 border border-{$this->secondaryColor->value}-200 dark:border-{$this->secondaryColor->value}-700";
     }
 
     public function getMobileModalItemClasses(): string
     {
+        // Theme-specific border radius with modern spacing
         $borderRadius = match ($this->themeStyle) {
             ThemeStyle::Simple => 'rounded-lg',
             ThemeStyle::Rounded => 'rounded-xl',
-            ThemeStyle::Square => 'rounded-none',
+            ThemeStyle::Square => 'rounded-md',  // Add subtle rounding for modern feel
         };
 
-        return "flex items-center justify-between p-3 {$borderRadius} hover:bg-{$this->secondaryColor->value}-50 dark:hover:bg-{$this->secondaryColor->value}-900/20 transition-colors";
+        // Enhanced modal items with smooth interactions
+        return "flex items-center justify-between p-3.5 {$borderRadius} hover:bg-{$this->primaryColor->value}-50 dark:hover:bg-{$this->primaryColor->value}-900/10 active:bg-{$this->primaryColor->value}-100 dark:active:bg-{$this->primaryColor->value}-800/20 transition-all duration-150";
     }
 
     public function getMobileModalItemContentClasses(): string
@@ -390,16 +411,18 @@ class ActioncrumbConfig
 
     public function getMobileModalActionItemClasses(bool $isEnabled = true): string
     {
+        // Theme-specific border radius with modern feel
         $borderRadius = match ($this->themeStyle) {
             ThemeStyle::Simple => 'rounded-lg',
             ThemeStyle::Rounded => 'rounded-xl',
-            ThemeStyle::Square => 'rounded-none',
+            ThemeStyle::Square => 'rounded-md',  // Add subtle rounding for modern feel
         };
 
-        $baseClasses = "w-full flex items-center px-3 py-3 min-h-[2.5rem] text-start {$borderRadius} transition-colors";
-        
+        // Enhanced action items with smooth transitions and better padding
+        $baseClasses = "w-full flex items-center px-3.5 py-3 min-h-[2.5rem] text-start {$borderRadius} transition-all duration-150 font-medium";
+
         if ($isEnabled) {
-            $hoverClasses = "text-{$this->secondaryColor->value}-700 dark:text-{$this->secondaryColor->value}-200 hover:bg-{$this->primaryColor->value}-50 hover:text-{$this->primaryColor->value}-700 dark:hover:bg-{$this->primaryColor->value}-900/10 dark:hover:text-{$this->primaryColor->value}-300";
+            $hoverClasses = "text-{$this->secondaryColor->value}-700 dark:text-{$this->secondaryColor->value}-200 hover:bg-{$this->primaryColor->value}-50 hover:text-{$this->primaryColor->value}-700 dark:hover:bg-{$this->primaryColor->value}-900/15 dark:hover:text-{$this->primaryColor->value}-300 active:bg-{$this->primaryColor->value}-100 dark:active:bg-{$this->primaryColor->value}-800/25";
             return "{$baseClasses} {$hoverClasses}";
         } else {
             return "{$baseClasses} opacity-50 cursor-not-allowed text-{$this->secondaryColor->value}-400 dark:text-{$this->secondaryColor->value}-500";
@@ -408,7 +431,8 @@ class ActioncrumbConfig
 
     public function getMobileModalCloseButtonClasses(): string
     {
-        return "text-{$this->secondaryColor->value}-400 hover:text-{$this->primaryColor->value}-600 dark:hover:text-{$this->primaryColor->value}-300 transition-colors";
+        // Enhanced close button with modern hover states
+        return "text-{$this->secondaryColor->value}-400 hover:text-{$this->primaryColor->value}-600 dark:hover:text-{$this->primaryColor->value}-300 hover:bg-{$this->secondaryColor->value}-100 dark:hover:bg-{$this->secondaryColor->value}-700/50 rounded-lg p-1 transition-all duration-150";
     }
 
     public function getMobileModalHeaderClasses(): string
